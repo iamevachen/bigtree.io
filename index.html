@@ -3,22 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>小红书爆文训练营 OS - 科技版</title>
+    <title>星火计划 | 数据操作系统</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet">
 
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        acidPurple: '#5B34C1',    // 酸性紫
-                        mintCyan: '#04789E',      // 薄荷浅青
-                        mistBlue: '#86D6EE',      // 雾霾灰蓝
-                        ultraBlack: '#010101',    // 极致黑
+                        wineRed: '#480011',    // 深酒红
+                        deepSea: '#231F67',    // 深海蓝
+                        electric: '#13A4E7',   // 电光蓝
+                        mistyBlue: '#3F4CA0',  // 雾霭蓝
+                        darkOrange: '#801115', // 暗红橙
                     }
                 }
             }
@@ -26,267 +26,394 @@
     </script>
 
     <style>
-        body { font-family: 'Inter', 'Noto Sans SC', sans-serif; background-color: #f8fafc; }
-        .acid-gradient { background: linear-gradient(135deg, #5B34C1 0%, #04789E 100%); }
-        .glass-card { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(12px); border: 1px solid rgba(134, 214, 238, 0.2); }
-        .status-exploded { background: rgba(91, 52, 193, 0.1); color: #5B34C1; border: 1px solid rgba(91, 52, 193, 0.2); }
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Noto+Sans+SC:wght@300;500;700&display=swap');
+        
+        body { font-family: 'Noto Sans SC', sans-serif; background-color: #0a0c1f; color: #ffffff; }
+        .font-tech { font-family: 'Orbitron', sans-serif; }
+        
+        /* 玻璃拟态卡片 */
+        .glass { background: rgba(35, 31, 103, 0.4); backdrop-filter: blur(10px); border: 1px solid rgba(19, 164, 231, 0.2); }
+        .sidebar-active { background: linear-gradient(90deg, #13A4E7 0%, transparent 100%); border-left: 4px solid #13A4E7; }
+        
+        /* 隐藏滚动条 */
         .hide-scroll::-webkit-scrollbar { display: none; }
         
-        /* 极致黑导航文字 */
-        .nav-link { color: #010101; font-weight: 600; }
-        .nav-link:hover { color: #5B34C1; }
+        /* 状态呼吸灯 */
+        .dot-urgent { box-shadow: 0 0 8px #801115; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+
+        /* 爆文墙滚动 */
+        .masonry { column-count: 2; column-gap: 1rem; }
+        @media (min-width: 768px) { .masonry { column-count: 3; } }
     </style>
 </head>
-<body class="text-ultraBlack min-h-screen pb-20">
+<body class="overflow-hidden h-screen flex flex-col md:flex-row">
 
-    <nav class="sticky top-0 z-40 w-full glass-card px-6 py-4 flex justify-between items-center">
-        <div class="flex items-center gap-3">
-            <div class="w-9 h-9 acid-gradient rounded-xl flex items-center justify-center text-white shadow-lg shadow-acidPurple/20">
-                <i data-lucide="terminal" class="w-5 h-5"></i>
+    <div id="login-overlay" class="fixed inset-0 z-[100] bg-deepSea flex items-center justify-center p-6">
+        <div class="max-w-md w-full glass p-8 rounded-3xl text-center space-y-8 border-t-4 border-electric">
+            <div>
+                <div class="w-20 h-20 bg-electric rounded-2xl mx-auto flex items-center justify-center shadow-[0_0_30px_rgba(19,164,231,0.5)] mb-4">
+                    <i data-lucide="sparkles" class="w-10 h-10 text-white"></i>
+                </div>
+                <h1 class="text-3xl font-bold font-tech tracking-wider">SPARK PROJECT</h1>
+                <p class="text-mistyBlue text-sm mt-2 font-light italic">星火计划数据操作系统 v1.0</p>
             </div>
-            <h1 class="font-bold text-xl tracking-tighter text-ultraBlack">RedBoost <span class="text-acidPurple">PRO</span></h1>
+            
+            <div class="space-y-4">
+                <input type="email" placeholder="邮箱 / 微信昵称" class="w-full bg-deepSea/50 border border-mistyBlue rounded-xl px-4 py-4 outline-none focus:border-electric transition-all">
+                <div class="grid grid-cols-2 gap-4">
+                    <button onclick="app.login('member')" class="py-4 bg-mistyBlue/30 hover:bg-mistyBlue/50 rounded-xl font-bold transition-all border border-mistyBlue/30">学员入口</button>
+                    <button onclick="app.login('admin')" class="py-4 bg-electric hover:bg-opacity-80 rounded-xl font-bold transition-all shadow-lg shadow-electric/20">管理端入口</button>
+                </div>
+            </div>
         </div>
-        <div class="flex items-center gap-4">
-            <select id="roleSelector" onchange="app.switchRole(this.value)" class="text-xs font-bold border-2 border-mistBlue/30 rounded-full px-4 py-1.5 bg-white outline-none focus:border-acidPurple">
-                <option value="member">学员模式</option>
-                <option value="admin">管理员模式</option>
-            </select>
-            <div class="w-9 h-9 rounded-xl bg-mistBlue flex items-center justify-center border border-white shadow-sm">
-                <i data-lucide="user" class="w-5 h-5 text-mintCyan"></i>
+    </div>
+
+    <nav class="hidden md:flex w-64 bg-deepSea border-r border-mistyBlue/20 flex-col p-6">
+        <div class="flex items-center gap-3 mb-10 px-2">
+            <i data-lucide="zap" class="text-electric w-6 h-6"></i>
+            <span class="font-bold text-xl tracking-widest font-tech">SPARK</span>
+        </div>
+        
+        <div class="flex-1 space-y-2">
+            <button onclick="app.view('dashboard')" class="w-full flex items-center gap-4 px-4 py-4 rounded-xl sidebar-active" id="nav-dashboard">
+                <i data-lucide="layout-dashboard"></i> 仪表盘
+            </button>
+            <button onclick="app.view('wall')" class="w-full flex items-center gap-4 px-4 py-4 rounded-xl text-mistyBlue hover:text-white transition-all" id="nav-wall">
+                <i data-lucide="layout-grid"></i> 爆文墙
+            </button>
+            <button onclick="app.view('rank')" class="w-full flex items-center gap-4 px-4 py-4 rounded-xl text-mistyBlue hover:text-white transition-all" id="nav-rank">
+                <i data-lucide="trophy"></i> 排行榜
+            </button>
+        </div>
+
+        <div class="mt-auto glass p-4 rounded-2xl flex items-center gap-3 border-none bg-mistyBlue/10">
+            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Spark" class="w-10 h-10 rounded-full bg-deepSea">
+            <div class="overflow-hidden">
+                <p class="text-sm font-bold truncate" id="user-display">星火学员</p>
+                <p class="text-[10px] text-mistyBlue uppercase tracking-tighter">Level: Active</p>
             </div>
         </div>
     </nav>
 
-    <main class="max-w-6xl mx-auto p-6 space-y-8">
+    <main class="flex-1 overflow-y-auto hide-scroll p-4 md:p-8 relative">
         
-        <section id="adminView" class="hidden grid grid-cols-2 md:grid-cols-4 gap-5">
-            <div class="bg-white p-5 rounded-2xl border border-mistBlue/20 shadow-sm">
-                <p class="text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">本周爆文</p>
-                <p class="text-3xl font-black text-acidPurple">42 <span class="text-sm font-normal text-mintCyan">↑12%</span></p>
+        <header class="flex justify-between items-end mb-8">
+            <div>
+                <h2 class="text-sm text-electric font-tech uppercase tracking-widest mb-1">Current Statistics</h2>
+                <h3 class="text-2xl font-bold" id="view-title">数据总览</h3>
             </div>
-            <div class="bg-ultraBlack p-5 rounded-2xl shadow-xl">
-                <p class="text-mistBlue/60 text-xs font-bold uppercase mb-1">爆文标准</p>
-                <p class="text-xl font-bold text-white">阅读 > 2k</p>
+            <div class="text-right hidden md:block">
+                <p class="text-xs text-mistyBlue uppercase">Next Update In</p>
+                <p class="text-lg font-tech text-electric" id="countdown">23:59:59</p>
             </div>
-            <div class="bg-white p-5 rounded-2xl border border-mistBlue/20 shadow-sm">
-                <p class="text-gray-400 text-xs font-bold uppercase mb-1">活跃成员</p>
-                <p class="text-3xl font-black text-mintCyan">128</p>
-            </div>
-            <div class="bg-white p-5 rounded-2xl border border-mistBlue/20 shadow-sm">
-                <p class="text-gray-400 text-xs font-bold uppercase mb-1">待催办</p>
-                <p class="text-3xl font-black text-orange-400">08</p>
-            </div>
-        </section>
+        </header>
 
-        <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="lg:col-span-2 bg-white p-6 rounded-3xl border border-mistBlue/10 shadow-sm">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="font-black text-lg flex items-center gap-2 italic">
-                        <span class="w-2 h-6 bg-acidPurple rounded-full"></span> DATA INSIGHT
-                    </h2>
-                    <div class="flex gap-2">
-                        <span class="w-3 h-3 rounded-full bg-acidPurple"></span>
-                        <span class="w-3 h-3 rounded-full bg-mintCyan"></span>
-                    </div>
-                </div>
-                <canvas id="growthChart" height="140"></canvas>
+        <div id="content-mount" class="space-y-6">
             </div>
-            
-            <div class="bg-acidPurple p-6 rounded-3xl text-white shadow-2xl shadow-acidPurple/30 flex flex-col justify-between">
-                <div>
-                    <h3 class="text-2xl font-black mb-2 leading-tight">记录你的<br>下一篇爆文</h3>
-                    <p class="text-mistBlue text-sm opacity-80">系统将自动分析 24h 后的数据波动</p>
-                </div>
-                <button onclick="app.openModal()" class="w-full bg-white text-acidPurple py-4 rounded-2xl font-black text-lg hover:bg-mistBlue transition-all flex items-center justify-center gap-2 group">
-                    <i data-lucide="plus-circle" class="group-hover:rotate-90 transition-transform"></i> 立即发布
-                </button>
-            </div>
-        </section>
 
-        <section class="space-y-4">
-            <h2 class="font-black text-gray-800 text-lg uppercase tracking-widest">Master Table / 记录明细</h2>
-            <div class="bg-white rounded-3xl shadow-xl shadow-mistBlue/5 overflow-hidden border border-mistBlue/10">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left">
-                        <thead class="bg-ultraBlack text-mistBlue/50 text-[10px] uppercase font-black">
-                            <tr>
-                                <th class="px-6 py-4 tracking-widest">Note Detail</th>
-                                <th class="px-6 py-4">Category</th>
-                                <th class="px-6 py-4">Metrics (R/L/S/C)</th>
-                                <th class="px-6 py-4">Status</th>
-                                <th class="px-6 py-4 text-right">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="noteTableBody" class="divide-y divide-gray-50 text-sm">
-                            </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
+        <button onclick="app.openEntry()" class="fixed bottom-24 right-6 md:bottom-10 md:right-10 w-16 h-16 bg-electric rounded-full shadow-[0_10px_40px_rgba(19,164,231,0.4)] flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-40 group">
+            <i data-lucide="plus" class="w-8 h-8 text-white group-hover:rotate-90 transition-transform"></i>
+        </button>
     </main>
 
-    <div id="modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-ultraBlack/60 backdrop-blur-md">
-        <div class="bg-white w-full max-w-md rounded-[2.5rem] p-8 space-y-6 shadow-2xl border-4 border-mistBlue">
-            <div class="flex justify-between items-center">
-                <h3 class="font-black text-2xl italic">NEW ENTRY</h3>
-                <button onclick="app.closeModal()" class="bg-gray-100 p-2 rounded-full hover:bg-mistBlue transition-colors"><i data-lucide="x" class="w-5 h-5 text-ultraBlack"></i></button>
+    <nav class="md:hidden fixed bottom-0 w-full glass border-t border-mistyBlue/20 flex justify-around py-4 z-50">
+        <button onclick="app.view('dashboard')" class="text-electric"><i data-lucide="home"></i></button>
+        <button onclick="app.view('wall')" class="text-mistyBlue"><i data-lucide="layout-grid"></i></button>
+        <button onclick="app.view('rank')" class="text-mistyBlue"><i data-lucide="trophy"></i></button>
+        <button onclick="location.reload()" class="text-mistyBlue"><i data-lucide="log-out"></i></button>
+    </nav>
+
+    <div id="modal-entry" class="fixed inset-0 z-[110] hidden bg-deepSea/90 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="max-w-xl w-full glass rounded-[2.5rem] overflow-hidden border-2 border-mistyBlue/30 flex flex-col max-h-[90vh]">
+            <div class="p-8 pb-4 flex justify-between items-center">
+                <h4 class="text-xl font-black italic tracking-tight"><span class="text-electric">NEW</span> NOTE ENTRY</h4>
+                <button onclick="app.closeEntry()" class="p-2 hover:bg-mistyBlue/20 rounded-full"><i data-lucide="x"></i></button>
             </div>
-            <form id="noteForm" class="space-y-5">
-                <input type="hidden" id="editId">
-                <div class="space-y-1">
-                    <label class="text-[10px] font-black text-acidPurple uppercase tracking-tighter">Note Link / Title</label>
-                    <input type="text" id="noteTitle" required class="w-full bg-slate-50 border-2 border-mistBlue/20 rounded-2xl px-5 py-4 outline-none focus:border-acidPurple font-bold">
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="space-y-1">
-                        <label class="text-[10px] font-black text-acidPurple uppercase tracking-tighter">Category</label>
-                        <select id="noteType" class="w-full bg-slate-50 border-2 border-mistBlue/20 rounded-2xl px-5 py-4 outline-none font-bold">
-                            <option value="flowith">Flowith AI</option>
-                            <option value="lecture">Lecture Note</option>
-                            <option value="other">Others</option>
-                        </select>
-                    </div>
-                    <div class="space-y-1">
-                        <label class="text-[10px] font-black text-acidPurple uppercase tracking-tighter">Date</label>
-                        <input type="date" id="noteDate" class="w-full bg-slate-50 border-2 border-mistBlue/20 rounded-2xl px-5 py-4 outline-none font-bold text-xs">
+            
+            <form id="entry-form" class="p-8 pt-0 space-y-6 overflow-y-auto hide-scroll">
+                <div class="space-y-2">
+                    <label class="text-[10px] font-bold text-mistyBlue uppercase tracking-widest">Step 1: AI Smart Parse</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="url-input" placeholder="粘贴小红书笔记链接..." class="flex-1 bg-deepSea/50 border border-mistyBlue/30 rounded-2xl px-5 py-3 outline-none focus:border-electric">
+                        <button type="button" onclick="app.parseUrl()" class="px-6 py-3 bg-mistyBlue text-white font-bold rounded-2xl hover:bg-electric transition-all">解析</button>
                     </div>
                 </div>
-                <div id="dataFields" class="hidden grid grid-cols-2 gap-3 p-4 bg-mistBlue/10 rounded-2xl">
-                    <input type="number" id="v_read" placeholder="阅读" class="bg-white border rounded-xl p-2 text-center font-bold">
-                    <input type="number" id="v_like" placeholder="点赞" class="bg-white border rounded-xl p-2 text-center font-bold">
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-bold text-mistyBlue uppercase tracking-widest">Note Title</label>
+                        <input type="text" id="entry-title" required class="w-full bg-deepSea/50 border border-mistyBlue/30 rounded-2xl px-5 py-3 outline-none">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-bold text-mistyBlue uppercase tracking-widest">Publish Time</label>
+                        <input type="datetime-local" id="entry-time" required class="w-full bg-deepSea/50 border border-mistyBlue/30 rounded-2xl px-5 py-3 outline-none text-sm">
+                    </div>
                 </div>
-                <button type="submit" class="w-full acid-gradient text-white py-5 rounded-2xl font-black text-lg shadow-xl shadow-acidPurple/40 active:scale-95 transition-all">
-                    SAVE RECORD
-                </button>
+
+                <div class="space-y-2">
+                    <label class="text-[10px] font-bold text-mistyBlue uppercase tracking-widest">Note Category</label>
+                    <div class="grid grid-cols-3 gap-3">
+                        <button type="button" onclick="app.setType('flowith')" class="type-btn py-3 rounded-xl border border-mistyBlue/30 text-xs font-bold" id="btn-flowith">Flowith实操</button>
+                        <button type="button" onclick="app.setType('lecture')" class="type-btn py-3 rounded-xl border border-mistyBlue/30 text-xs font-bold" id="btn-lecture">听课笔记</button>
+                        <button type="button" onclick="app.setType('other')" class="type-btn py-3 rounded-xl border border-mistyBlue/30 text-xs font-bold" id="btn-other">其他类型</button>
+                    </div>
+                </div>
+
+                <div class="bg-mistyBlue/10 p-6 rounded-3xl space-y-4">
+                    <p class="text-center text-[10px] font-bold text-electric uppercase tracking-widest border-b border-mistyBlue/20 pb-2">Step 2: Performance Metrics</p>
+                    <div class="grid grid-cols-4 gap-4">
+                        <div class="text-center"><p class="text-[10px] mb-1 opacity-60">阅读</p><input type="number" id="v_read" value="0" class="w-full bg-deepSea text-center py-2 rounded-lg border border-mistyBlue/20"></div>
+                        <div class="text-center"><p class="text-[10px] mb-1 opacity-60">点赞</p><input type="number" id="v_like" value="0" class="w-full bg-deepSea text-center py-2 rounded-lg border border-mistyBlue/20"></div>
+                        <div class="text-center"><p class="text-[10px] mb-1 opacity-60">收藏</p><input type="number" id="v_collect" value="0" class="w-full bg-deepSea text-center py-2 rounded-lg border border-mistyBlue/20"></div>
+                        <div class="text-center"><p class="text-[10px] mb-1 opacity-60">评论</p><input type="number" id="v_comment" value="0" class="w-full bg-deepSea text-center py-2 rounded-lg border border-mistyBlue/20"></div>
+                    </div>
+                    
+                    <div class="relative group cursor-pointer border-2 border-dashed border-mistyBlue/30 rounded-2xl p-6 text-center hover:border-electric transition-all">
+                        <input type="file" class="absolute inset-0 opacity-0 cursor-pointer">
+                        <i data-lucide="image" class="w-8 h-8 mx-auto mb-2 text-mistyBlue"></i>
+                        <p class="text-xs text-mistyBlue">点击或拖拽上传封面/数据凭证</p>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-[10px] font-bold text-mistyBlue uppercase tracking-widest">Step 3: Review</label>
+                    <textarea id="entry-review" placeholder="这篇笔记做对了什么？..." class="w-full bg-deepSea/50 border border-mistyBlue/30 rounded-2xl px-5 py-3 outline-none h-20 text-sm"></textarea>
+                </div>
+
+                <button type="submit" class="w-full bg-darkOrange py-5 rounded-2xl font-black text-lg shadow-xl shadow-darkOrange/20 hover:scale-[1.02] active:scale-95 transition-all uppercase italic">Save Note</button>
             </form>
         </div>
     </div>
 
+    <div id="toast" class="fixed top-10 left-1/2 -translate-x-1/2 glass border-wineRed px-8 py-3 rounded-full text-sm font-bold opacity-0 translate-y-[-20px] transition-all z-[200]">
+        </div>
+
     <script>
-        // 核心逻辑保留并适配新色系
+        /**
+         * 星火计划核心逻辑控制器
+         * 采用产品化思维：数据隔离、生命周期管理、智能模拟
+         */
         const app = {
             state: {
                 role: 'member',
-                threshold: 2000,
+                currentView: 'dashboard',
+                threshold: 1000,
+                selectedType: 'flowith',
                 notes: [
-                    { id: 1, title: '酸性设计在小红书的流量密码', type: 'flowith', date: '2026-01-25', read: 4500, like: 820, collect: 450, comment: 88, status: 'done', user: 'Leo' },
-                    { id: 2, title: 'AI 绘画提示词高级班总结', type: 'lecture', date: '2026-01-27', read: 0, like: 0, collect: 0, comment: 0, status: 'pending', user: 'Leo' }
+                    { id: 101, title: '2026星火计划：AI内容创作避坑指南', type: 'flowith', time: '2026-01-27T10:00', read: 2450, like: 156, collect: 89, comment: 24, review: '使用了情绪化钩子，首图对比强烈。', user: '张小火', status: 'hot', cover: 'https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=300' },
+                    { id: 102, title: '训练营第三课：爆款封面设计逻辑', type: 'lecture', time: '2026-01-28T09:00', read: 450, like: 20, collect: 15, comment: 5, review: '整理了结构化导图，非常清晰。', user: '张小火', status: 'pending', cover: 'https://images.unsplash.com/photo-1614850523296-d8c1af93d400?w=300' }
                 ]
             },
 
             init() {
                 lucide.createIcons();
-                this.renderNotes();
-                this.initChart();
+                this.updateCountdown();
+                setInterval(() => this.updateCountdown(), 1000);
             },
 
-            switchRole(role) {
+            login(role) {
                 this.state.role = role;
-                document.getElementById('adminView').classList.toggle('hidden', role !== 'admin');
-                this.renderNotes();
+                document.getElementById('login-overlay').classList.add('hidden');
+                document.getElementById('user-display').innerText = role === 'admin' ? '项目主理人' : '星火学员 - 张小火';
+                this.view('dashboard');
+                this.showToast(`欢迎回来，${role === 'admin' ? '主理人' : '星火学员'}`);
             },
 
-            renderNotes() {
-                const body = document.getElementById('noteTableBody');
-                body.innerHTML = '';
-
-                this.state.notes.forEach(note => {
-                    const isExploded = note.read >= this.state.threshold;
-                    const tr = document.createElement('tr');
-                    tr.className = "group hover:bg-mistBlue/5 transition-all";
-                    tr.innerHTML = `
-                        <td class="px-6 py-5">
-                            <div class="flex flex-col">
-                                <span class="font-bold text-ultraBlack">${note.title}</span>
-                                <span class="text-[10px] text-gray-400 font-bold uppercase">${note.user} · ${note.date}</span>
-                            </div>
-                        </td>
-                        <td class="px-6 py-5">
-                            <span class="text-[10px] font-black px-3 py-1 bg-mistBlue/20 rounded-full text-mintCyan uppercase italic">${note.type}</span>
-                        </td>
-                        <td class="px-6 py-5 font-mono text-xs font-bold">
-                            ${note.status === 'pending' ? '<span class="text-gray-300">WAITING...</span>' : `<span class="text-acidPurple">${note.read}</span> / ${note.like} / ${note.collect}`}
-                        </td>
-                        <td class="px-6 py-5">
-                            <span class="px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-tighter ${isExploded ? 'status-exploded' : (note.status === 'pending' ? 'bg-orange-50 text-orange-500' : 'bg-gray-100 text-gray-400')}">
-                                ${isExploded ? '★ Exploded' : (note.status === 'pending' ? 'Pending' : 'Normal')}
-                            </span>
-                        </td>
-                        <td class="px-6 py-5 text-right">
-                            <button onclick="app.openModal(${note.id})" class="opacity-0 group-hover:opacity-100 bg-ultraBlack text-white text-[10px] px-3 py-2 rounded-lg font-black transition-all">UPDATE</button>
-                        </td>
-                    `;
-                    body.appendChild(tr);
+            view(type) {
+                this.state.currentView = type;
+                const mount = document.getElementById('content-mount');
+                const title = document.getElementById('view-title');
+                
+                // 更新导航样式
+                ['dashboard', 'wall', 'rank'].forEach(v => {
+                    const el = document.getElementById(`nav-${v}`);
+                    if(el) el.classList.toggle('sidebar-active', v === type);
                 });
+
+                if(type === 'dashboard') {
+                    title.innerText = "数据仪表盘";
+                    this.renderDashboard(mount);
+                } else if(type === 'wall') {
+                    title.innerText = "本周爆文墙";
+                    this.renderWall(mount);
+                } else if(type === 'rank') {
+                    title.innerText = "星火荣誉榜";
+                    mount.innerHTML = `<div class="glass p-10 text-center rounded-3xl"><i data-lucide="award" class="w-12 h-12 mx-auto mb-4 text-electric"></i><p>本周榜单将于周日 24:00 生成</p></div>`;
+                }
                 lucide.createIcons();
             },
 
-            initChart() {
-                const ctx = document.getElementById('growthChart').getContext('2d');
-                new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'],
-                        datasets: [{
-                            data: [12, 19, 15, 28, 22, 34, 42],
-                            borderColor: '#5B34C1',
-                            borderWidth: 4,
-                            pointBackgroundColor: '#04789E',
-                            tension: 0.4,
-                            fill: true,
-                            backgroundColor: 'rgba(134, 214, 238, 0.1)'
-                        }]
-                    },
-                    options: {
-                        plugins: { legend: { display: false } },
-                        scales: { 
-                            y: { display: false },
-                            x: { grid: { display: false }, ticks: { font: { weight: 'bold', size: 10 } } } 
-                        }
-                    }
+            // 渲染数据总览
+            renderDashboard(mount) {
+                const myNotes = this.state.notes;
+                const totalReads = myNotes.reduce((acc, cur) => acc + cur.read, 0);
+                const hotCount = myNotes.filter(n => n.read >= this.state.threshold).length;
+                
+                mount.innerHTML = `
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="glass p-6 rounded-3xl border-l-4 border-electric">
+                            <p class="text-xs text-mistyBlue font-bold uppercase">Total Reads</p>
+                            <p class="text-3xl font-tech mt-2 text-white">${totalReads.toLocaleString()}</p>
+                        </div>
+                        <div class="glass p-6 rounded-3xl border-l-4 border-darkOrange">
+                            <p class="text-xs text-mistyBlue font-bold uppercase">Hot Notes</p>
+                            <p class="text-3xl font-tech mt-2 text-darkOrange">${hotCount}</p>
+                        </div>
+                        <div class="glass p-6 rounded-3xl border-l-4 border-mistyBlue">
+                            <p class="text-xs text-mistyBlue font-bold uppercase">Explode Rate</p>
+                            <p class="text-3xl font-tech mt-2 text-white">${((hotCount/myNotes.length)*100).toFixed(1)}%</p>
+                        </div>
+                        <div class="glass p-6 rounded-3xl border-l-4 border-green-500">
+                            <p class="text-xs text-mistyBlue font-bold uppercase">Pending Task</p>
+                            <p class="text-3xl font-tech mt-2 text-green-500">01</p>
+                        </div>
+                    </div>
+
+                    <div class="glass p-6 rounded-3xl overflow-hidden">
+                        <h4 class="font-bold mb-6 flex items-center gap-2 italic"><span class="w-1 h-5 bg-electric"></span> 个人笔记明细</h4>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm">
+                                <thead class="border-b border-mistyBlue/20 text-mistyBlue text-[10px] uppercase tracking-widest">
+                                    <tr>
+                                        <th class="pb-4">Note Title / ID</th>
+                                        <th class="pb-4">Metrics</th>
+                                        <th class="pb-4">Category</th>
+                                        <th class="pb-4">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-mistyBlue/10">
+                                    ${myNotes.map(n => `
+                                        <tr>
+                                            <td class="py-4">
+                                                <div class="font-bold text-white line-clamp-1">${n.title}</div>
+                                                <div class="text-[10px] text-mistyBlue">${n.time.replace('T', ' ')}</div>
+                                            </td>
+                                            <td class="py-4 font-tech text-xs text-electric">
+                                                ${n.read} / ${n.like} / ${n.collect}
+                                            </td>
+                                            <td class="py-4">
+                                                <span class="text-[10px] px-2 py-1 bg-mistyBlue/20 rounded-md text-mistyBlue uppercase font-bold">${n.type}</span>
+                                            </td>
+                                            <td class="py-4">
+                                                ${n.status === 'pending' ? 
+                                                    `<button class="flex items-center gap-1 text-darkOrange font-bold text-xs"><span class="w-2 h-2 bg-darkOrange rounded-full dot-urgent"></span> 待补回填</button>` : 
+                                                    `<button class="text-mistyBlue hover:text-white"><i data-lucide="edit-3" class="w-4 h-4"></i></button>`
+                                                }
+                                            </td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // 渲染瀑布流爆文墙
+            renderWall(mount) {
+                const hotNotes = this.state.notes.filter(n => n.read >= this.state.threshold);
+                mount.innerHTML = `
+                    <div class="masonry space-y-4">
+                        ${hotNotes.map(n => `
+                            <div class="break-inside-avoid glass rounded-2xl overflow-hidden hover:scale-[1.02] transition-all cursor-pointer group">
+                                <div class="relative">
+                                    <img src="${n.cover}" class="w-full h-auto">
+                                    <div class="absolute bottom-2 left-2 glass border-none px-2 py-1 rounded-lg flex items-center gap-1 text-[10px] font-tech">
+                                        <i data-lucide="eye" class="w-3 h-3 text-electric"></i> ${n.read}
+                                    </div>
+                                    <div class="absolute top-2 right-2 bg-darkOrange text-white text-[8px] font-bold px-2 py-1 rounded-full uppercase tracking-tighter">Exploded</div>
+                                </div>
+                                <div class="p-3">
+                                    <p class="text-sm font-bold line-clamp-2 leading-tight mb-2">${n.title}</p>
+                                    <div class="flex items-center gap-2 border-t border-mistyBlue/10 pt-2">
+                                        <div class="w-5 h-5 rounded-full bg-mistyBlue flex items-center justify-center text-[8px]">${n.user[0]}</div>
+                                        <span class="text-[10px] text-mistyBlue">${n.user}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            },
+
+            openEntry() {
+                document.getElementById('modal-entry').classList.remove('hidden');
+                this.setType('flowith');
+            },
+
+            closeEntry() {
+                document.getElementById('modal-entry').classList.add('hidden');
+                document.getElementById('entry-form').reset();
+            },
+
+            setType(val) {
+                this.state.selectedType = val;
+                document.querySelectorAll('.type-btn').forEach(btn => {
+                    btn.classList.remove('bg-electric', 'text-white', 'border-electric');
+                    btn.classList.add('border-mistyBlue/30', 'text-mistyBlue');
                 });
+                document.getElementById(`btn-${val}`).classList.add('bg-electric', 'text-white', 'border-electric');
             },
 
-            openModal(id = null) {
-                document.getElementById('modal').classList.remove('hidden');
-                document.getElementById('dataFields').classList.toggle('hidden', !id);
-                if(id) {
-                    const note = this.state.notes.find(n => n.id === id);
-                    document.getElementById('editId').value = id;
-                    document.getElementById('noteTitle').value = note.title;
-                    document.getElementById('v_read').value = note.read;
-                }
+            parseUrl() {
+                const url = document.getElementById('url-input').value;
+                if(!url) return this.showToast("请先粘贴链接");
+                
+                // 模拟智能解析逻辑
+                this.showToast("正在通过AI提取笔记信息...");
+                setTimeout(() => {
+                    document.getElementById('entry-title').value = "解析：关于小红书流量分发的底层逻辑探讨";
+                    document.getElementById('entry-time').value = "2026-01-28T18:00";
+                    this.showToast("解析成功！");
+                }, 1000);
             },
 
-            closeModal() {
-                document.getElementById('modal').classList.add('hidden');
-                document.getElementById('noteForm').reset();
+            showToast(msg) {
+                const t = document.getElementById('toast');
+                t.innerText = msg;
+                t.classList.remove('opacity-0', 'translate-y-[-20px]');
+                t.classList.add('opacity-100', 'translate-y-0');
+                setTimeout(() => {
+                    t.classList.add('opacity-0', 'translate-y-[-20px]');
+                }, 3000);
+            },
+
+            updateCountdown() {
+                const now = new Date();
+                const hours = 23 - now.getHours();
+                const mins = 59 - now.getMinutes();
+                const secs = 59 - now.getSeconds();
+                document.getElementById('countdown').innerText = 
+                    `${String(hours).padStart(2,'0')}:${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
             }
         };
 
-        document.getElementById('noteForm').onsubmit = (e) => {
+        // 处理表单提交
+        document.getElementById('entry-form').onsubmit = (e) => {
             e.preventDefault();
-            const id = document.getElementById('editId').value;
-            if(id) {
-                const idx = app.state.notes.findIndex(n => n.id == id);
-                app.state.notes[idx].read = document.getElementById('v_read').value;
-                app.state.notes[idx].status = 'done';
-            } else {
-                app.state.notes.unshift({
-                    id: Date.now(),
-                    title: document.getElementById('noteTitle').value,
-                    type: document.getElementById('noteType').value,
-                    date: document.getElementById('noteDate').value || '2026-01-28',
-                    read: 0, like: 0, collect: 0, comment: 0,
-                    status: 'pending',
-                    user: 'You'
-                });
-            }
-            app.renderNotes();
-            app.closeModal();
+            const newNote = {
+                id: Date.now(),
+                title: document.getElementById('entry-title').value,
+                type: app.state.selectedType,
+                time: document.getElementById('entry-time').value,
+                read: parseInt(document.getElementById('v_read').value) || 0,
+                like: parseInt(document.getElementById('v_like').value) || 0,
+                collect: parseInt(document.getElementById('v_collect').value) || 0,
+                comment: parseInt(document.getElementById('v_comment').value) || 0,
+                review: document.getElementById('entry-review').value,
+                user: app.state.role === 'admin' ? '主理人' : '张小火',
+                status: 'done',
+                cover: 'https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=300'
+            };
+
+            app.state.notes.unshift(newNote);
+            app.showToast("笔记记录成功！");
+            app.view(app.state.currentView);
+            app.closeEntry();
         };
 
+        // 初始化
         window.onload = () => app.init();
     </script>
 </body>
