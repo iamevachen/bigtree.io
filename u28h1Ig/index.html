@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>小红书爆文训练营管理系统</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'Noto Sans SC', 'sans-serif'],
+                    },
+                    colors: {
+                        xhs: {
+                            red: '#FF2442', // Official XHS Red
+                            dark: '#1F2937',
+                            gray: '#F9FAFB',
+                            surface: '#FFFFFF'
+                        }
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                        'float': '0 10px 30px -5px rgba(0, 0, 0, 0.1)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Internal Styles -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-gray-50 text-gray-800 antialiased h-full">
+
+    <!-- Login Overlay -->
+    <div id="login-modal" class="fixed inset-0 z-50 bg-white/90 backdrop-blur-md flex items-center justify-center transition-all duration-500">
+        <div class="bg-white p-8 rounded-2xl shadow-float w-full max-w-md border border-gray-100 text-center">
+            <div class="flex justify-center mb-6">
+                <div class="w-16 h-16 bg-xhs-red rounded-2xl flex items-center justify-center text-white">
+                    <i data-lucide="flame" class="w-8 h-8"></i>
+                </div>
+            </div>
+            <h1 class="text-2xl font-bold mb-2">爆文训练营</h1>
+            <p class="text-gray-500 mb-8 text-sm">数据驱动 · 爆款复制 · 极速成长</p>
+            
+            <div class="space-y-4">
+                <button onclick="window.app.login('admin')" class="w-full py-3 bg-gray-900 text-white rounded-xl font-medium hover:bg-gray-800 transition-colors flex items-center justify-center gap-2">
+                    <i data-lucide="shield"></i> 管理员登录
+                </button>
+                <div class="relative flex py-2 items-center">
+                    <div class="flex-grow border-t border-gray-200"></div>
+                    <span class="flex-shrink mx-4 text-gray-400 text-xs">学员入口</span>
+                    <div class="flex-grow border-t border-gray-200"></div>
+                </div>
+                <button onclick="window.app.login('member')" class="w-full py-3 bg-xhs-red text-white rounded-xl font-medium hover:bg-red-600 transition-colors flex items-center justify-center gap-2 shadow-lg shadow-red-200">
+                    <i data-lucide="user"></i> 学员登录 (模拟)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="app-container" class="hidden flex h-screen overflow-hidden">
+        
+        <!-- Sidebar (Desktop) -->
+        <aside class="hidden md:flex w-64 bg-white border-r border-gray-100 flex-col z-20">
+            <div class="p-6 flex items-center gap-3">
+                <div class="w-8 h-8 bg-xhs-red rounded-lg flex items-center justify-center text-white">
+                    <i data-lucide="zap" class="w-5 h-5"></i>
+                </div>
+                <span class="font-bold text-lg tracking-tight">训练营 OS</span>
+            </div>
+
+            <nav class="flex-1 px-4 space-y-2 mt-4">
+                <a href="#dashboard" class="nav-item active flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-gray-50 hover:text-xhs-red transition-all">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                    <span class="font-medium">数据总览</span>
+                </a>
+                <a href="#wall" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-gray-50 hover:text-xhs-red transition-all">
+                    <i data-lucide="trophy" class="w-5 h-5"></i>
+                    <span class="font-medium">爆文墙</span>
+                    <span class="ml-auto bg-xhs-red/10 text-xhs-red text-xs px-2 py-0.5 rounded-full font-bold">HOT</span>
+                </a>
+                <a href="#table" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-gray-50 hover:text-xhs-red transition-all">
+                    <i data-lucide="table-2" class="w-5 h-5"></i>
+                    <span class="font-medium">数据明细</span>
+                </a>
+            </nav>
+
+            <div class="p-4 border-t border-gray-100">
+                <div class="bg-gray-50 rounded-xl p-4">
+                    <div class="flex items-center gap-3 mb-3">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" class="w-10 h-10 rounded-full bg-white border border-gray-200">
+                        <div>
+                            <p class="text-sm font-bold text-gray-900" id="user-name-display">...</p>
+                            <p class="text-xs text-gray-500" id="user-role-display">...</p>
+                        </div>
+                    </div>
+                    <button onclick="window.location.reload()" class="w-full text-xs text-gray-500 hover:text-red-500 flex items-center justify-center gap-1">
+                        <i data-lucide="log-out" class="w-3 h-3"></i> 退出登录
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col h-full relative overflow-hidden">
+            
+            <!-- Mobile Header -->
+            <header class="md:hidden bg-white/80 backdrop-blur-md border-b border-gray-100 p-4 flex justify-between items-center z-30 sticky top-0">
+                <div class="font-bold text-lg flex items-center gap-2">
+                    <i data-lucide="zap" class="text-xhs-red w-5 h-5"></i> 训练营 OS
+                </div>
+                <button id="mobile-menu-btn" class="p-2 bg-gray-50 rounded-lg">
+                    <i data-lucide="menu" class="w-6 h-6 text-gray-600"></i>
+                </button>
+            </header>
+
+            <!-- Scrollable Area -->
+            <div id="content-area" class="flex-1 overflow-y-auto p-4 md:p-8 pb-24 md:pb-8 scroll-smooth">
+                <!-- Dynamic Content Injected Here -->
+            </div>
+
+            <!-- Floating Action Button (Mobile) -->
+            <button onclick="window.app.openPostModal()" class="md:hidden fixed bottom-24 right-6 bg-xhs-red text-white w-14 h-14 rounded-full shadow-float flex items-center justify-center z-40 transition-transform hover:scale-110 active:scale-95">
+                <i data-lucide="plus" class="w-8 h-8"></i>
+            </button>
+
+            <!-- Bottom Nav (Mobile) -->
+            <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around py-3 z-50 pb-safe">
+                <a href="#dashboard" class="mobile-nav-item active flex flex-col items-center gap-1 text-gray-400">
+                    <i data-lucide="layout-dashboard" class="w-6 h-6"></i>
+                    <span class="text-[10px]">总览</span>
+                </a>
+                <a href="#wall" class="mobile-nav-item flex flex-col items-center gap-1 text-gray-400">
+                    <i data-lucide="trophy" class="w-6 h-6"></i>
+                    <span class="text-[10px]">爆文</span>
+                </a>
+                <a href="#table" class="mobile-nav-item flex flex-col items-center gap-1 text-gray-400">
+                    <i data-lucide="table-2" class="w-6 h-6"></i>
+                    <span class="text-[10px]">明细</span>
+                </a>
+            </nav>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <!-- 1. Post Entry/Edit Modal -->
+    <div id="post-modal" class="fixed inset-0 z-[60] hidden bg-black/40 backdrop-blur-sm flex items-end md:items-center justify-center transition-opacity opacity-0 pointer-events-none">
+        <div class="bg-white w-full md:w-[600px] md:rounded-2xl rounded-t-2xl shadow-2xl max-h-[90vh] overflow-y-auto transform translate-y-full md:translate-y-0 transition-transform duration-300">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold text-gray-900" id="modal-title">录入新笔记</h3>
+                    <button onclick="window.app.closeModal('post-modal')" class="p-2 hover:bg-gray-100 rounded-full">
+                        <i data-lucide="x" class="w-6 h-6 text-gray-500"></i>
+                    </button>
+                </div>
+                
+                <form id="post-form" class="space-y-5">
+                    <!-- Quick Paste -->
+                    <div class="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                        <label class="block text-xs font-semibold text-gray-500 uppercase mb-2">智能解析 (支持粘贴链接)</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="smart-link" placeholder="粘贴小红书笔记链接..." class="flex-1 bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-xhs-red focus:border-transparent outline-none">
+                            <button type="button" onclick="window.app.parseLink()" class="px-4 py-2 bg-gray-900 text-white text-sm rounded-lg hover:bg-gray-800">解析</button>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">笔记标题</label>
+                            <input type="text" name="title" required class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-xhs-red outline-none">
+                        </div>
+                         <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">发布时间</label>
+                            <input type="datetime-local" name="publishDate" required class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-xhs-red outline-none">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">赛道/类型</label>
+                        <div class="flex gap-2">
+                            <label class="cursor-pointer">
+                                <input type="radio" name="type" value="flowith" class="peer sr-only" checked>
+                                <span class="px-3 py-1.5 rounded-full border border-gray-300 text-sm peer-checked:bg-xhs-red peer-checked:text-white peer-checked:border-xhs-red transition-all">Flowith实操</span>
+                            </label>
+                            <label class="cursor-pointer">
+                                <input type="radio" name="type" value="lecture" class="peer sr-only">
+                                <span class="px-3 py-1.5 rounded-full border border-gray-300 text-sm peer-checked:bg-xhs-red peer-checked:text-white peer-checked:border-xhs-red transition-all">听课笔记</span>
+                            </label>
+                            <label class="cursor-pointer">
+                                <input type="radio" name="type" value="other" class="peer sr-only">
+                                <span class="px-3 py-1.5 rounded-full border border-gray-300 text-sm peer-checked:bg-xhs-red peer-checked:text-white peer-checked:border-xhs-red transition-all">其他</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Data Section (Hidden initially if new) -->
+                    <div id="data-update-section" class="border-t border-gray-100 pt-5 mt-5">
+                        <h4 class="font-bold text-gray-900 mb-3 flex items-center gap-2">
+                            <i data-lucide="bar-chart-2" class="w-4 h-4 text-xhs-red"></i> 数据回填
+                        </h4>
+                        <div class="grid grid-cols-4 gap-3 mb-4">
+                            <div class="text-center">
+                                <label class="block text-xs text-gray-500 mb-1">👀 阅读</label>
+                                <input type="number" name="reads" class="w-full text-center border border-gray-300 rounded-md py-1.5 text-sm">
+                            </div>
+                            <div class="text-center">
+                                <label class="block text-xs text-gray-500 mb-1">❤️ 点赞</label>
+                                <input type="number" name="likes" class="w-full text-center border border-gray-300 rounded-md py-1.5 text-sm">
+                            </div>
+                            <div class="text-center">
+                                <label class="block text-xs text-gray-500 mb-1">⭐ 收藏</label>
+                                <input type="number" name="collects" class="w-full text-center border border-gray-300 rounded-md py-1.5 text-sm">
+                            </div>
+                            <div class="text-center">
+                                <label class="block text-xs text-gray-500 mb-1">💬 评论</label>
+                                <input type="number" name="comments" class="w-full text-center border border-gray-300 rounded-md py-1.5 text-sm">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">关键凭证 (封面图/数据截图)</label>
+                            <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:bg-gray-50 transition-colors cursor-pointer relative" id="drop-zone">
+                                <input type="file" id="file-input" class="absolute inset-0 opacity-0 cursor-pointer" accept="image/*">
+                                <div id="file-preview" class="hidden h-32 w-full bg-cover bg-center rounded-lg mb-2 mx-auto max-w-[200px]"></div>
+                                <div id="file-placeholder">
+                                    <i data-lucide="image-plus" class="w-8 h-8 text-gray-400 mx-auto mb-2"></i>
+                                    <p class="text-xs text-gray-500">点击上传封面或数据截图</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">一句话复盘</label>
+                        <textarea name="review" rows="2" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-xhs-red outline-none" placeholder="这篇笔记做对了什么？..."></textarea>
+                    </div>
+
+                    <button type="submit" class="w-full py-3 bg-xhs-red text-white rounded-xl font-bold hover:bg-red-600 shadow-lg shadow-red-200 transition-all">
+                        保存记录
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-6 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-full shadow-xl flex items-center gap-3 transition-all duration-300 opacity-0 translate-y-[-20px] pointer-events-none z-[100]">
+        <i data-lucide="check-circle" class="w-5 h-5 text-green-400"></i>
+        <span id="toast-msg" class="text-sm font-medium">操作成功</span>
+    </div>
+
+    <script type="module" src="main.js"></script>
+</body>
+</html>
+
