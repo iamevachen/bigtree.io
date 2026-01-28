@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>星火计划 | 数字化管理后台</title>
+    <title>星火计划 | 复古协作系统</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script>
@@ -11,103 +11,122 @@
             theme: {
                 extend: {
                     colors: {
-                        tiffany: '#81D8D0',   // 蒂芙尼蓝
-                        cloud: '#E9EDF0',     // 浅云 (大背景)
-                        slate: '#2A313D',     // 青灰 (导航/标题)
-                        borderGray: '#D1D5DB'
+                        beige: '#D6CFBB',     // 浅米驼 (大背景)
+                        dustyRed: '#D8575D',  // 复古豆沙红 (爆文/高亮)
+                        mistyBlue: '#A3BBCE', // 雾霾浅蓝 (选中/数据)
+                        neutralGray: '#808080'// 中性深灰 (导航/边框)
                     }
                 }
             }
         }
     </script>
     <style>
-        body { background-color: #E9EDF0; color: #2A313D; font-family: 'Inter', 'PingFang SC', sans-serif; }
-        .nav-item { @apply flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-gray-400 hover:text-white hover:bg-white/10; }
-        .nav-active { @apply bg-tiffany text-slate font-bold shadow-lg shadow-tiffany/20; }
-        .data-card { @apply bg-white rounded-2xl p-6 shadow-sm border border-white/50; }
-        .status-pill { @apply px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider; }
-        /* 自定义滚动条 */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-thumb { background: #81D8D0; border-radius: 10px; }
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&display=swap');
+        
+        body { background-color: #D6CFBB; color: #333; font-family: 'Noto Serif SC', serif; }
+        
+        /* 侧边导航逻辑 */
+        .nav-btn { @apply flex flex-col items-center justify-center gap-1 py-6 transition-all border-b border-black/5 text-neutralGray; }
+        .nav-active { @apply bg-white/40 text-dustyRed border-r-4 border-r-dustyRed; }
+        
+        /* 复古纸张卡片 */
+        .retro-card { background: #FCF9F2; border: 1px solid #C9C0A8; box-shadow: 2px 2px 0px #B5AD96; }
+        .retro-input { background: #F2EEE4; border: 1px solid #B5AD96; border-radius: 4px; padding: 10px; outline: none; }
+        
+        /* 隐藏滚动条 */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: #A3BBCE; }
     </style>
 </head>
 <body class="flex h-screen overflow-hidden">
 
-    <aside class="w-64 bg-slate text-white flex flex-col p-6 shrink-0">
-        <div class="flex items-center gap-3 mb-10 px-2">
-            <div class="w-8 h-8 bg-tiffany rounded-lg flex items-center justify-center">
-                <i data-lucide="zap" class="text-slate w-5 h-5"></i>
+    <aside class="w-24 bg-[#CFC8B4] border-r border-[#B5AD96] flex flex-col shrink-0">
+        <div class="h-24 flex items-center justify-center border-b border-[#B5AD96]">
+            <div class="w-10 h-10 bg-dustyRed rounded-full flex items-center justify-center shadow-inner">
+                <i data-lucide="flame" class="text-beige w-6 h-6"></i>
             </div>
-            <span class="font-black text-xl italic tracking-tighter">SPARK OS</span>
         </div>
 
-        <nav class="space-y-2 flex-1">
-            <button onclick="app.navigate('dashboard')" id="nav-dashboard" class="nav-item w-full nav-active">
-                <i data-lucide="layout-dashboard"></i> 看板
+        <nav class="flex-1 overflow-y-auto">
+            <button onclick="app.navigate('dashboard')" id="nav-dashboard" class="nav-btn w-full nav-active">
+                <i data-lucide="compass" class="w-6 h-6"></i>
+                <span class="text-xs font-bold">看板</span>
             </button>
-            <button onclick="app.navigate('data')" id="nav-data" class="nav-item w-full">
-                <i data-lucide="database"></i> 数据
+            <button onclick="app.navigate('data')" id="nav-data" class="nav-btn w-full">
+                <i data-lucide="scroll-text" class="w-6 h-6"></i>
+                <span class="text-xs font-bold">数据</span>
             </button>
-            <button onclick="app.navigate('wall')" id="nav-wall" class="nav-item w-full">
-                <i data-lucide="gallery-horizontal-end"></i> 爆文墙
+            <button onclick="app.navigate('wall')" id="nav-wall" class="nav-btn w-full">
+                <i data-lucide="layout-grid" class="w-6 h-6"></i>
+                <span class="text-xs font-bold">爆文墙</span>
             </button>
-            <button onclick="app.navigate('mine')" id="nav-mine" class="nav-item w-full">
-                <i data-lucide="user-circle"></i> 我的
+            <button onclick="app.navigate('mine')" id="nav-mine" class="nav-btn w-full border-b-0">
+                <i data-lucide="user-square-2" class="w-6 h-6"></i>
+                <span class="text-xs font-bold">我的</span>
             </button>
         </nav>
 
-        <div class="mt-auto p-4 bg-white/5 rounded-2xl border border-white/10">
-            <p class="text-[10px] text-gray-400 uppercase font-bold mb-2">当前并发用户</p>
-            <div class="flex -space-x-2">
-                <div class="w-6 h-6 rounded-full bg-tiffany border-2 border-slate"></div>
-                <div class="w-6 h-6 rounded-full bg-blue-400 border-2 border-slate"></div>
-                <div class="w-6 h-6 rounded-full bg-slate-500 border-2 border-slate flex items-center justify-center text-[8px]">+98</div>
-            </div>
+        <div class="p-4 text-center border-t border-[#B5AD96]">
+            <p class="text-[9px] text-neutralGray uppercase leading-tight font-bold">Spark<br>2026</p>
         </div>
     </aside>
 
     <main class="flex-1 flex flex-col overflow-hidden">
-        <header class="h-20 bg-white/50 backdrop-blur-md flex items-center justify-between px-8 border-b border-gray-200">
-            <h2 id="page-title" class="text-xl font-black text-slate uppercase italic">Dashboard / 数据看板</h2>
-            <div class="flex items-center gap-4">
-                <div class="relative">
-                    <input type="text" placeholder="搜索笔记..." class="pl-10 pr-4 py-2 bg-white rounded-xl border border-gray-200 text-sm focus:ring-2 ring-tiffany outline-none">
-                    <i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-gray-400"></i>
+        <header class="h-20 flex items-center justify-between px-10 border-b border-[#B5AD96]/50">
+            <div>
+                <h2 id="page-title" class="text-xl font-bold text-gray-700 tracking-widest">看板 / DASHBOARD</h2>
+                <div class="h-1 w-10 bg-dustyRed mt-1"></div>
+            </div>
+            
+            <div class="flex items-center gap-6">
+                <div class="text-right hidden md:block">
+                    <p class="text-[10px] text-neutralGray font-bold italic uppercase">Synchronizing...</p>
+                    <p id="user-info" class="text-sm font-bold text-gray-600">欢迎, 星火学员</p>
                 </div>
-                <button onclick="app.openModal()" class="bg-tiffany px-6 py-2.5 rounded-xl text-slate font-black text-sm shadow-lg shadow-tiffany/30 hover:scale-105 active:scale-95 transition-all">
-                    + 录入笔记
+                <button onclick="app.openModal()" class="bg-dustyRed px-6 py-3 text-white text-xs font-bold tracking-widest rounded-sm shadow-[3px_3px_0px_#801115] active:translate-y-[2px] active:shadow-none transition-all">
+                    录入成果
                 </button>
             </div>
         </header>
 
-        <section id="main-content" class="flex-1 overflow-y-auto p-8 space-y-8">
+        <section id="content-area" class="flex-1 overflow-y-auto p-10 space-y-8">
             </section>
     </main>
 
-    <div id="modal" class="fixed inset-0 z-50 hidden bg-slate/60 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-lg rounded-[2.5rem] shadow-2xl overflow-hidden animate-in zoom-in duration-300">
-            <div class="p-8 border-b border-gray-100 flex justify-between items-center">
-                <h3 class="font-bold text-xl text-slate italic">新增笔记成果</h3>
-                <button onclick="app.closeModal()" class="p-2 hover:bg-cloud rounded-full transition-colors"><i data-lucide="x"></i></button>
+    <div id="modal" class="fixed inset-0 z-50 hidden bg-black/30 backdrop-blur-[2px] flex items-center justify-center p-4">
+        <div class="retro-card w-full max-w-lg p-10 animate-in fade-in slide-in-from-bottom-4 duration-300">
+            <div class="flex justify-between items-center mb-8 border-b-2 border-black pb-4">
+                <h3 class="text-xl font-bold italic tracking-tighter uppercase">Entry / 新增记录</h3>
+                <button onclick="app.closeModal()"><i data-lucide="x-circle" class="text-neutralGray"></i></button>
             </div>
-            <form id="noteForm" class="p-8 space-y-4">
-                <input type="text" id="m_link" placeholder="小红书链接" class="w-full px-5 py-3 bg-cloud/50 rounded-xl outline-none focus:ring-2 ring-tiffany/50">
-                <input type="text" id="m_title" placeholder="笔记标题" class="w-full px-5 py-3 bg-cloud/50 rounded-xl outline-none" required>
-                <div class="grid grid-cols-2 gap-4">
-                    <select id="m_type" class="px-5 py-3 bg-cloud/50 rounded-xl outline-none">
-                        <option>Flowith实操</option>
-                        <option>听课笔记</option>
-                        <option>其他</option>
-                    </select>
-                    <input type="datetime-local" id="m_time" class="px-5 py-3 bg-cloud/50 rounded-xl outline-none">
+            <form id="entryForm" class="space-y-5">
+                <div class="space-y-2">
+                    <label class="text-xs font-bold uppercase text-neutralGray">Note Link / 笔记链接</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="link" class="retro-input flex-1" placeholder="在此粘贴...">
+                        <button type="button" onclick="app.aiParse()" class="bg-mistyBlue px-4 text-white text-xs font-bold uppercase">解析</button>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="space-y-2">
+                        <label class="text-xs font-bold uppercase text-neutralGray">Title / 标题</label>
+                        <input type="text" id="title" class="retro-input w-full" required>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-xs font-bold uppercase text-neutralGray">Type / 类型</label>
+                        <select id="type" class="retro-input w-full">
+                            <option>Flowith实操</option>
+                            <option>听课笔记</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="grid grid-cols-4 gap-2">
-                    <input type="number" id="v_read" placeholder="阅" class="w-full py-3 bg-cloud/50 rounded-xl text-center font-bold outline-none">
-                    <input type="number" id="v_like" placeholder="赞" class="w-full py-3 bg-cloud/50 rounded-xl text-center font-bold outline-none">
-                    <input type="number" id="v_collect" placeholder="藏" class="w-full py-3 bg-cloud/50 rounded-xl text-center font-bold outline-none">
-                    <input type="number" id="v_comment" placeholder="评" class="w-full py-3 bg-cloud/50 rounded-xl text-center font-bold outline-none">
+                    <div class="text-center"><p class="text-[10px] mb-1">阅读</p><input id="r" type="number" class="retro-input w-full text-center"></div>
+                    <div class="text-center"><p class="text-[10px] mb-1">点赞</p><input id="l" type="number" class="retro-input w-full text-center"></div>
+                    <div class="text-center"><p class="text-[10px] mb-1">收藏</p><input id="s" type="number" class="retro-input w-full text-center"></div>
+                    <div class="text-center"><p class="text-[10px] mb-1">评论</p><input id="c" type="number" class="retro-input w-full text-center"></div>
                 </div>
-                <button type="submit" class="w-full py-4 bg-tiffany text-slate font-black rounded-xl shadow-xl shadow-tiffany/20">保存数据并同步</button>
+                <button type="submit" class="w-full bg-black py-4 text-white font-bold uppercase tracking-widest hover:bg-dustyRed transition-colors">Confirm & Sync / 确认同步</button>
             </form>
         </div>
     </div>
@@ -115,61 +134,75 @@
     <script>
         const app = {
             state: {
-                current: 'dashboard',
-                user: '张小火',
-                db: [
-                    { id: 1, user: '李火火', title: '2026星火实操：AI辅助写作全流程', type: 'Flowith', read: 12500, like: 890, hot: true, status: '已更新' },
-                    { id: 2, user: '张小火', title: '笔记：如何设计爆款首图的钩子', type: '听课笔记', read: 450, like: 32, hot: false, status: '待更新' },
+                view: 'dashboard',
+                user: localStorage.getItem('spark_user') || '星火学员',
+                db: JSON.parse(localStorage.getItem('spark_db_retro')) || [
+                    { id: 1, user: '李火火', title: '2026星火实操：AI内容分发逻辑', type: 'Flowith', read: 12500, like: 890, hot: true, status: '爆文', time: '2026-01-27' },
+                    { id: 2, user: '张小火', title: '复盘：新手如何快速拿到流量反馈', type: '听课笔记', read: 450, like: 32, hot: false, status: '待更新', time: '2026-01-28' },
                 ]
             },
 
             init() {
                 lucide.createIcons();
                 this.navigate('dashboard');
+                document.getElementById('user-info').innerText = `欢迎, ${this.state.user}`;
             },
 
-            navigate(view) {
-                this.state.current = view;
-                // 更新导航样式
-                ['dashboard', 'data', 'wall', 'mine'].forEach(v => {
-                    const el = document.getElementById(`nav-${v}`);
-                    el.className = `nav-item w-full ${view === v ? 'nav-active' : ''}`;
+            navigate(v) {
+                this.state.view = v;
+                // UI 切换
+                ['dashboard', 'data', 'wall', 'mine'].forEach(i => {
+                    const el = document.getElementById(`nav-${i}`);
+                    el.className = `nav-btn w-full ${v === i ? 'nav-active' : ''}`;
                 });
 
-                const content = document.getElementById('main-content');
+                const el = document.getElementById('content-area');
                 const title = document.getElementById('page-title');
 
-                if (view === 'dashboard') {
-                    title.innerText = 'Dashboard / 数据看板';
-                    this.renderDashboard(content);
-                } else if (view === 'data') {
-                    title.innerText = 'Database / 笔记管理';
-                    this.renderData(content);
-                } else if (view === 'wall') {
-                    title.innerText = 'Hot Wall / 爆文广场';
-                    content.innerHTML = `<div class="p-20 text-center opacity-50 italic">爆文瀑布流加载中...</div>`;
-                } else if (view === 'mine') {
-                    title.innerText = 'Profile / 个人中心';
-                    this.renderMine(content);
+                if(v === 'dashboard') {
+                    title.innerText = '看板 / DASHBOARD';
+                    this.renderDashboard(el);
+                } else if(v === 'data') {
+                    title.innerText = '数据 / DATA LIST';
+                    this.renderData(el);
+                } else if(v === 'mine') {
+                    title.innerText = '我的 / MY PROFILE';
+                    this.renderMine(el);
                 }
                 lucide.createIcons();
             },
 
             renderDashboard(el) {
+                const totalReads = this.state.db.reduce((a, b) => a + b.read, 0);
+                const hotCount = this.state.db.filter(i => i.hot).length;
+
                 el.innerHTML = `
-                    <div class="grid grid-cols-4 gap-6">
-                        <div class="data-card border-b-4 border-b-tiffany">
-                            <p class="text-xs font-bold text-gray-400 uppercase">总阅读量</p>
-                            <p class="text-3xl font-black mt-2">48,290</p>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                        <div class="retro-card p-6 flex flex-col items-center">
+                            <span class="text-[10px] font-black text-neutralGray uppercase tracking-widest">Total Readings</span>
+                            <span class="text-4xl font-bold mt-2">${totalReads.toLocaleString()}</span>
                         </div>
-                        <div class="data-card border-b-4 border-b-slate">
-                            <p class="text-xs font-bold text-gray-400 uppercase">爆文数量</p>
-                            <p class="text-3xl font-black mt-2">12</p>
+                        <div class="retro-card p-6 flex flex-col items-center border-t-4 border-t-dustyRed">
+                            <span class="text-[10px] font-black text-neutralGray uppercase tracking-widest">Hot Articles</span>
+                            <span class="text-4xl font-bold mt-2 text-dustyRed">${hotCount}</span>
                         </div>
                     </div>
-                    <div class="data-card">
-                        <h4 class="font-bold mb-4">实时排行榜</h4>
-                        <div class="space-y-4" id="rank-content"></div>
+                    <div class="retro-card p-8">
+                        <h4 class="font-bold border-b border-[#B5AD96] pb-4 mb-6 italic italic uppercase">Realtime Ranking / 全员实时榜单</h4>
+                        <div class="space-y-4">
+                            ${this.state.db.sort((a,b)=>b.read - a.read).map((n, i) => `
+                                <div class="flex items-center justify-between group p-2 hover:bg-mistyBlue/10 transition-colors">
+                                    <div class="flex items-center gap-4">
+                                        <span class="text-lg font-bold ${i<3 ? 'text-dustyRed':'text-neutralGray'}">0${i+1}</span>
+                                        <div>
+                                            <p class="font-bold text-sm">${n.user}</p>
+                                            <p class="text-[10px] text-neutralGray line-clamp-1">${n.title}</p>
+                                        </div>
+                                    </div>
+                                    <span class="font-bold text-mistyBlue">${n.read}</span>
+                                </div>
+                            `).join('')}
+                        </div>
                     </div>
                 `;
             },
@@ -177,34 +210,26 @@
             renderData(el) {
                 el.innerHTML = `
                     <div class="flex gap-4 mb-6">
-                        <select class="px-4 py-2 rounded-xl border border-gray-200 text-sm outline-none focus:ring-2 ring-tiffany/50">
-                            <option>Flowith</option><option>听课笔记</option>
-                        </select>
-                        <select class="px-4 py-2 rounded-xl border border-gray-200 text-sm outline-none focus:ring-2 ring-tiffany/50">
-                            <option>所有状态</option><option>爆文</option><option>待更新</option>
-                        </select>
+                        <select class="retro-input text-xs font-bold text-neutralGray"><option>Flowith</option></select>
+                        <select class="retro-input text-xs font-bold text-neutralGray"><option>所有状态</option></select>
                     </div>
-                    <div class="bg-white rounded-3xl overflow-hidden border border-gray-100">
-                        <table class="w-full text-left text-sm">
-                            <thead class="bg-cloud/50 border-b border-gray-100 text-gray-400 font-bold">
+                    <div class="retro-card overflow-hidden">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-[#F2EEE4] border-b border-[#B5AD96] font-bold">
                                 <tr>
-                                    <th class="px-6 py-4">发布者</th>
-                                    <th class="px-6 py-4">笔记标题</th>
-                                    <th class="px-6 py-4">阅读量 <i data-lucide="arrow-down-narrow-wide" class="w-3 h-3 inline"></i></th>
-                                    <th class="px-6 py-4">状态</th>
-                                    <th class="px-6 py-4">操作</th>
+                                    <th class="px-6 py-4">作者</th><th class="px-6 py-4">标题</th><th class="px-6 py-4">阅读量</th><th class="px-6 py-4">状态</th><th class="px-6 py-4">操作</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-gray-50">
+                            <tbody class="divide-y divide-[#B5AD96]/30">
                                 ${this.state.db.map(n => `
-                                    <tr class="hover:bg-cloud/20 transition-colors">
-                                        <td class="px-6 py-4 font-bold text-slate">${n.user}</td>
-                                        <td class="px-6 py-4 text-gray-500">${n.title}</td>
-                                        <td class="px-6 py-4 font-mono font-bold text-tiffany">${n.read.toLocaleString()}</td>
+                                    <tr class="hover:bg-mistyBlue/5">
+                                        <td class="px-6 py-4 font-bold text-neutralGray">${n.user}</td>
+                                        <td class="px-6 py-4 font-bold">${n.title}</td>
+                                        <td class="px-6 py-4 font-bold text-mistyBlue italic">${n.read.toLocaleString()}</td>
                                         <td class="px-6 py-4">
-                                            <span class="status-pill ${n.status==='待更新'?'bg-red-50 text-red-400':'bg-tiffany/10 text-tiffany'}">${n.status}</span>
+                                            <span class="px-2 py-1 rounded-sm text-[9px] font-bold ${n.status==='待更新'?'bg-dustyRed/10 text-dustyRed border border-dustyRed/20':'bg-mistyBlue/10 text-mistyBlue border border-mistyBlue/20'}">${n.status}</span>
                                         </td>
-                                        <td class="px-6 py-4"><button class="text-gray-300 hover:text-slate"><i data-lucide="pencil" class="w-4 h-4"></i></button></td>
+                                        <td class="px-6 py-4"><i data-lucide="pencil" class="w-3 h-3 text-neutralGray cursor-pointer hover:text-black"></i></td>
                                     </tr>
                                 `).join('')}
                             </tbody>
@@ -214,37 +239,33 @@
             },
 
             renderMine(el) {
+                const myNotes = this.state.db.filter(i => i.user === this.state.user);
                 el.innerHTML = `
-                    <div class="grid grid-cols-3 gap-8">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
                         <div class="col-span-1 space-y-6">
-                            <div class="data-card text-center">
-                                <div class="w-24 h-24 bg-cloud rounded-full mx-auto mb-4 border-4 border-white shadow-sm flex items-center justify-center">
-                                    <i data-lucide="user" class="w-10 h-10 text-slate"></i>
+                            <div class="retro-card p-10 text-center">
+                                <div class="w-20 h-20 bg-mistyBlue/20 border-2 border-mistyBlue rounded-full mx-auto mb-4 flex items-center justify-center">
+                                    <i data-lucide="user-2" class="w-8 h-8 text-mistyBlue"></i>
                                 </div>
-                                <h3 class="font-black text-xl">${this.state.user}</h3>
-                                <p class="text-xs text-gray-400 mt-1 uppercase tracking-widest italic">Spark Pro Member</p>
+                                <h3 class="text-xl font-bold">${this.state.user}</h3>
+                                <p class="text-[10px] font-black text-neutralGray uppercase tracking-widest mt-2 italic">Official Spark Member</p>
                             </div>
-                            <div class="data-card">
-                                <h4 class="font-bold text-xs uppercase text-gray-400 mb-4">待办任务</h4>
-                                <div class="space-y-3">
-                                    <div class="flex items-center gap-3 text-xs bg-red-50 p-3 rounded-xl border border-red-100">
-                                        <i data-lucide="alert-circle" class="w-4 h-4 text-red-400"></i>
-                                        <span class="flex-1 font-bold">补全 01-27 笔记阅读量</span>
-                                    </div>
-                                </div>
+                            <div class="retro-card p-6 border-l-4 border-l-dustyRed">
+                                <h4 class="text-xs font-bold uppercase mb-4 tracking-tighter">Pending Task / 待办</h4>
+                                <div class="bg-dustyRed/5 p-3 border border-dustyRed/10 text-[11px] font-bold text-dustyRed">有 1 篇笔记发布已超24h，请回填数据</div>
                             </div>
                         </div>
                         <div class="col-span-2 space-y-6">
-                            <div class="data-card">
-                                <h4 class="font-bold mb-6 italic">数据概览</h4>
-                                <div class="grid grid-cols-3 gap-4">
-                                    <div class="p-4 bg-cloud/50 rounded-2xl">
-                                        <p class="text-[10px] font-bold text-gray-400">平均阅读</p>
-                                        <p class="text-xl font-black">2,401</p>
+                            <div class="retro-card p-8">
+                                <h4 class="text-sm font-black uppercase italic border-b border-[#B5AD96] pb-2 mb-6">Personal Analytics / 个人概览</h4>
+                                <div class="grid grid-cols-3 gap-6">
+                                    <div class="p-4 bg-beige/50 border border-[#B5AD96]">
+                                        <p class="text-[9px] font-bold text-neutralGray">笔记数</p>
+                                        <p class="text-2xl font-bold">${myNotes.length}</p>
                                     </div>
-                                    <div class="p-4 bg-cloud/50 rounded-2xl">
-                                        <p class="text-[10px] font-bold text-gray-400">爆文率</p>
-                                        <p class="text-xl font-black">15.4%</p>
+                                    <div class="p-4 bg-beige/50 border border-[#B5AD96]">
+                                        <p class="text-[9px] font-bold text-neutralGray">平均阅读</p>
+                                        <p class="text-2xl font-bold">2.4k</p>
                                     </div>
                                 </div>
                             </div>
@@ -254,10 +275,28 @@
             },
 
             openModal() { document.getElementById('modal').classList.remove('hidden'); },
-            closeModal() { document.getElementById('modal').classList.add('hidden'); }
+            closeModal() { document.getElementById('modal').classList.add('hidden'); },
+            aiParse() { alert("模拟：AI 已抓取当前小红书链接标题..."); document.getElementById('title').value = "解析成果：2026 爆款实录"; }
         };
 
         window.onload = () => app.init();
+
+        document.getElementById('entryForm').onsubmit = (e) => {
+            e.preventDefault();
+            const newItem = {
+                id: Date.now(),
+                user: app.state.user,
+                title: document.getElementById('title').value,
+                read: parseInt(document.getElementById('r').value) || 0,
+                type: document.getElementById('type').value,
+                status: '已更新',
+                hot: (parseInt(document.getElementById('r').value) || 0) > 1000
+            };
+            app.state.db.unshift(newItem);
+            localStorage.setItem('spark_db_retro', JSON.stringify(app.state.db));
+            app.navigate(app.state.view);
+            app.closeModal();
+        };
     </script>
 </body>
 </html>
