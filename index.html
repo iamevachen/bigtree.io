@@ -3,190 +3,197 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>星火计划 | 数据统计</title>
+    <title>星火计划 - 小红书爆文训练营管理系统</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        beige: '#D6CFBB',     // 浅米驼
-                        dustyRed: '#D8575D',  // 复古豆沙红
-                        mistyBlue: '#A3BBCE', // 雾霾浅蓝
-                        neutralGray: '#808080'// 中性深灰
-                    }
-                }
-            }
-        }
-    </script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&display=swap');
-        body { background-color: #D6CFBB; color: #333; font-family: 'Noto Serif SC', serif; }
-        
-        /* 保持左侧图标文字完全对齐布局 */
-        .nav-btn { @apply flex flex-col items-center justify-center gap-1 py-6 transition-all border-b border-black/5 text-neutralGray; }
-        .nav-active { @apply bg-white/40 text-dustyRed border-r-4 border-r-dustyRed; }
-        
-        .retro-card { background: #FCF9F2; border: 1px solid #C9C0A8; box-shadow: 2px 2px 0px #B5AD96; }
-        .retro-input { background: #F2EEE4; border: 1px solid #B5AD96; border-radius: 4px; padding: 10px; outline: none; }
-        
-        /* 新增：预览小眼睛样式 */
-        .preview-container { @apply relative w-20 h-20 border border-[#B5AD96] rounded overflow-hidden group; }
-        .eye-overlay { @apply absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all cursor-pointer; }
+        :root {
+            --bg-light: #E9EDF0;
+            --tiffany-blue: #81D8D0;
+            --camel: #D6CFBB;
+            --bean-red: #D8575D;
+            --mist-blue: #A3BBCE;
+            --neutral-gray: #808080;
+        }
+        body { background-color: var(--bg-light); font-family: "Microsoft YaHei", sans-serif; }
+        .sidebar-item { display: flex; align-items: center; padding: 12px 20px; transition: all 0.3s; color: var(--neutral-gray); cursor: pointer; }
+        .sidebar-item:hover, .sidebar-item.active { background-color: var(--tiffany-blue); color: white; }
+        .sidebar-item i { margin-right: 12px; width: 20px; text-align: center; }
+        .card { background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .viral-badge { background-color: var(--bean-red); color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px; }
+        .btn-primary { background-color: var(--tiffany-blue); color: white; }
+        .stat-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; background-color: var(--bean-red); animation: blink 1.5s infinite; }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
     </style>
 </head>
 <body class="flex h-screen overflow-hidden">
 
-    <aside class="w-24 bg-[#CFC8B4] border-r border-[#B5AD96] flex flex-col shrink-0">
-        <div class="h-24 flex items-center justify-center border-b border-[#B5AD96]">
-            <div class="w-10 h-10 bg-dustyRed rounded-full flex items-center justify-center">
-                <i data-lucide="flame" class="text-beige w-6 h-6"></i>
+    <div id="login-overlay" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="card p-8 w-80 text-center">
+            <h2 class="text-2xl font-bold mb-6 text-gray-700">星火计划登录</h2>
+            <button onclick="closeLogin()" class="w-full mb-4 py-3 border flex items-center justify-center gap-2 rounded-lg hover:bg-gray-50 transition">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/7/7e/WeChat_logo.svg" width="20"> 微信一键登录
+            </button>
+            <div class="text-gray-400 text-sm mb-4">或者</div>
+            <input type="text" placeholder="昵称 / 邮箱" class="w-full border p-2 mb-4 rounded">
+            <button onclick="closeLogin()" class="w-full btn-primary py-2 rounded-lg font-bold">进入系统</button>
+        </div>
+    </div>
+
+    <nav class="w-64 bg-white border-r flex flex-col justify-between py-6">
+        <div>
+            <div class="px-6 mb-10">
+                <h1 class="text-xl font-bold text-gray-800 border-l-4 border-tiffany-blue pl-3">星火计划</h1>
+                <p class="text-xs text-gray-400 mt-1">爆文训练营管理系统</p>
+            </div>
+            <div class="sidebar-item active" onclick="showPage('dashboard')"><i>📊</i><span>看板</span></div>
+            <div class="sidebar-item" onclick="showPage('data')"><i>📂</i><span>数据</span></div>
+            <div class="sidebar-item" onclick="showPage('wall')"><i>🔥</i><span>爆文墙</span></div>
+            <div class="sidebar-item" onclick="showPage('mine')"><i>👤</i><span>我的</span></div>
+        </div>
+        <div class="px-6">
+            <div class="text-xs text-gray-400 border-t pt-4 text-center">10年全栈专家 监制</div>
+        </div>
+    </nav>
+
+    <main class="flex-1 overflow-y-auto p-8" id="content-area">
+        <div id="page-dashboard">
+            <div class="flex justify-between items-end mb-8">
+                <div>
+                    <h2 class="text-3xl font-bold text-gray-800">运营数据概览</h2>
+                    <p class="text-gray-500">欢迎回来，今日营内新增 12 篇爆文！</p>
+                </div>
+                <div class="flex gap-4">
+                    <div class="card p-4 text-center bg-white">
+                        <p class="text-xs text-gray-400">当前爆文阈值</p>
+                        <p class="text-xl font-bold text-blue-500">> 5,000</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+                <div class="card p-6 border-b-4 border-tiffany-blue">
+                    <p class="text-gray-400 text-sm">总阅读量</p>
+                    <p class="text-3xl font-bold mt-2">1,284,900</p>
+                </div>
+                <div class="card p-6 border-b-4 border-mist-blue">
+                    <p class="text-gray-400 text-sm">总互动数</p>
+                    <p class="text-3xl font-bold mt-2">42,301</p>
+                </div>
+                <div class="card p-6 border-b-4 border-camel">
+                    <p class="text-gray-400 text-sm">本周爆文</p>
+                    <p class="text-3xl font-bold mt-2">156</p>
+                </div>
+                <div class="card p-6 border-b-4 border-bean-red">
+                    <p class="text-gray-400 text-sm">平均爆文率</p>
+                    <p class="text-3xl font-bold mt-2">18.5%</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-8">
+                <div class="card p-6">
+                    <h3 class="font-bold mb-4">近七日流量走势</h3>
+                    <canvas id="mainChart"></canvas>
+                </div>
+                <div class="card p-6">
+                    <h3 class="font-bold mb-4">内容赛道分布</h3>
+                    <canvas id="pieChart"></canvas>
+                </div>
             </div>
         </div>
-        <nav class="flex-1 overflow-y-auto">
-            <button onclick="app.navigate('dashboard')" id="nav-dashboard" class="nav-btn w-full nav-active">
-                <i data-lucide="compass" class="w-6 h-6"></i><span class="text-xs font-bold">看板</span>
-            </button>
-            <button onclick="app.navigate('data')" id="nav-data" class="nav-btn w-full">
-                <i data-lucide="scroll-text" class="w-6 h-6"></i><span class="text-xs font-bold">数据</span>
-            </button>
-            <button onclick="app.navigate('wall')" id="nav-wall" class="nav-btn w-full">
-                <i data-lucide="layout-grid" class="w-6 h-6"></i><span class="text-xs font-bold">爆文墙</span>
-            </button>
-            <button onclick="app.navigate('mine')" id="nav-mine" class="nav-btn w-full border-b-0">
-                <i data-lucide="user-square-2" class="w-6 h-6"></i><span class="text-xs font-bold">我的</span>
-            </button>
-        </nav>
-    </aside>
-
-    <main class="flex-1 flex flex-col overflow-hidden">
-        <header class="h-20 flex items-center justify-between px-10 border-b border-[#B5AD96]/50">
-            <h2 id="page-title" class="text-xl font-bold tracking-widest">看板 / DASHBOARD</h2>
-            <button onclick="app.openModal()" class="bg-dustyRed px-6 py-3 text-white text-xs font-bold tracking-widest rounded-sm shadow-[3px_3px_0px_#801115]">
-                录入成果
-            </button>
-        </header>
-
-        <section id="content-area" class="flex-1 overflow-y-auto p-10 space-y-8"></section>
     </main>
 
-    <div id="modal" class="fixed inset-0 z-50 hidden bg-black/30 backdrop-blur-[2px] flex items-center justify-center p-4">
-        <div class="retro-card w-full max-w-xl p-10">
-            <div class="flex justify-between items-center mb-6 border-b-2 border-black pb-4">
-                <h3 class="text-xl font-bold italic uppercase">Entry / 新增记录</h3>
-                <button onclick="app.closeModal()"><i data-lucide="x-circle"></i></button>
-            </div>
-            
-            <form id="entryForm" class="space-y-4">
-                <input type="text" id="title" placeholder="笔记标题" class="retro-input w-full" required>
-                
-                <div class="flex items-center gap-4 p-4 border border-dashed border-neutralGray rounded">
-                    <div onclick="document.getElementById('fileInput').click()" class="cursor-pointer text-center">
-                        <i data-lucide="image-plus" class="mx-auto text-neutralGray"></i>
-                        <p class="text-[10px] font-bold mt-1">上传封面/截图</p>
-                        <input type="file" id="fileInput" class="hidden" accept="image/*" onchange="app.handleUpload(this)">
-                    </div>
-                    <div id="previewBox" class="hidden preview-container">
-                        <img id="previewImg" src="" class="w-full h-full object-cover">
-                        <div class="eye-overlay" onclick="app.viewLarge()">
-                            <i data-lucide="eye" class="text-white w-5 h-5"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-4 gap-2">
-                    <input id="r" type="number" placeholder="阅读" class="retro-input text-center">
-                    <input id="l" type="number" placeholder="点赞" class="retro-input text-center">
-                    <input id="s" type="number" placeholder="收藏" class="retro-input text-center">
-                    <input id="c" type="number" placeholder="评论" class="retro-input text-center">
-                </div>
-
-                <textarea id="review" placeholder="一句话复盘：这篇笔记做对了什么？" class="retro-input w-full h-20 text-sm"></textarea>
-
-                <button type="submit" class="w-full bg-dustyRed py-4 text-white font-bold uppercase tracking-widest shadow-[3px_3px_0px_#801115]">
-                    保存记录
-                </button>
-            </form>
-        </div>
-    </div>
-
-    <div id="zoomOverlay" class="fixed inset-0 z-[100] hidden bg-black/90 flex items-center justify-center" onclick="this.classList.add('hidden')">
-        <img id="zoomImg" src="" class="max-w-[90%] max-h-[90%] border-4 border-white">
-    </div>
+    <button class="fixed bottom-8 right-8 w-14 h-14 rounded-full shadow-lg btn-primary text-3xl flex items-center justify-center hover:scale-110 transition cursor-pointer">+</button>
 
     <script>
-        const app = {
-            state: { view: 'dashboard', currentImg: null, db: JSON.parse(localStorage.getItem('spark_final_db')) || [] },
-            init() { lucide.createIcons(); this.navigate('dashboard'); },
-            navigate(v) {
-                this.state.view = v;
-                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('nav-active'));
-                document.getElementById(`nav-${v}`).classList.add('nav-active');
-                this.render();
-            },
-            handleUpload(input) {
-                if (input.files && input.files[0]) {
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        this.state.currentImg = e.target.result;
-                        document.getElementById('previewImg').src = e.target.result;
-                        document.getElementById('previewBox').classList.remove('hidden');
-                    };
-                    reader.readAsDataURL(input.files[0]);
-                }
-            },
-            viewLarge() {
-                document.getElementById('zoomImg').src = this.state.currentImg;
-                document.getElementById('zoomOverlay').classList.remove('hidden');
-            },
-            render() {
-                const el = document.getElementById('content-area');
-                if(this.state.view === 'data') {
-                    el.innerHTML = `
-                        <div class="retro-card overflow-hidden">
-                            <table class="w-full text-left text-xs">
-                                <thead class="bg-[#F2EEE4] border-b border-[#B5AD96] font-bold">
-                                    <tr><th class="px-6 py-4">凭证</th><th class="px-6 py-4">标题</th><th class="px-6 py-4">阅读</th><th class="px-6 py-4">复盘</th></tr>
-                                </thead>
-                                <tbody>
-                                    ${this.state.db.map(n => `
-                                        <tr class="border-b border-[#B5AD96]/20">
-                                            <td class="px-6 py-3">${n.img ? `<img src="${n.img}" class="w-8 h-8 rounded border">` : '-'}</td>
-                                            <td class="px-6 py-3 font-bold">${n.title}</td>
-                                            <td class="px-6 py-3 text-mistyBlue font-bold">${n.read}</td>
-                                            <td class="px-6 py-3 italic text-neutralGray">${n.review || '-'}</td>
-                                        </tr>
-                                    `).join('')}
-                                </tbody>
-                            </table>
-                        </div>`;
-                } else {
-                    el.innerHTML = `<div class="p-20 text-center text-neutralGray italic">看板/其他页面内容保持不变...</div>`;
-                }
-                lucide.createIcons();
-            },
-            openModal() { document.getElementById('modal').classList.remove('hidden'); },
-            closeModal() { document.getElementById('modal').classList.add('hidden'); }
-        };
+        function closeLogin() { document.getElementById('login-overlay').style.display = 'none'; renderCharts(); }
+        
+        function showPage(pageId) {
+            const area = document.getElementById('content-area');
+            document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            
+            if(pageId === 'data') {
+                area.innerHTML = `
+                    <h2 class="text-2xl font-bold mb-6">笔记数据管理</h2>
+                    <div class="flex gap-4 mb-6">
+                        <select class="p-2 rounded border"><option>所有赛道</option><option>Flowith标签</option></select>
+                        <select class="p-2 rounded border"><option>所有状态</option><option>爆文</option><option>待更新</option></select>
+                    </div>
+                    <div class="card overflow-hidden">
+                        <table class="w-full text-left">
+                            <thead class="bg-gray-50 border-b">
+                                <tr>
+                                    <th class="p-4">发布者</th><th class="p-4">笔记标题</th><th class="p-4">阅读量 <span class="text-[10px]">▼</span></th><th class="p-4">状态</th><th class="p-4">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b">
+                                    <td class="p-4 text-sm">张三</td><td class="p-4 font-medium">如何用AI写爆款文案...</td><td class="p-4">12,405</td><td class="p-4"><span class="viral-badge">爆文</span></td><td class="p-4 text-blue-500 cursor-pointer">编辑</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="p-4 text-sm">李四</td><td class="p-4 font-medium">我的第一周学习心得</td><td class="p-4">421</td><td class="p-4"><span class="stat-dot mr-2"></span>待更新</td><td class="p-4 text-blue-500 cursor-pointer">回填</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>`;
+            } else if(pageId === 'wall') {
+                area.innerHTML = `
+                    <h2 class="text-2xl font-bold mb-6">本周爆文墙</h2>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                        ${[1,2,3,4].map(i => `
+                            <div class="card overflow-hidden group">
+                                <div class="relative h-64 bg-gray-200">
+                                    <div class="absolute bottom-2 left-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded">👁️ ${i*2}k</div>
+                                    <img src="https://via.placeholder.com/300x400?text=Cover+${i}" class="w-full h-full object-cover">
+                                </div>
+                                <div class="p-4">
+                                    <p class="font-bold text-sm truncate">爆款标题示范案 ${i}</p>
+                                    <p class="text-xs text-gray-400 mt-1">复盘：钩子开头效果极佳...</p>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>`;
+            } else if(pageId === 'mine') {
+                area.innerHTML = `
+                    <h2 class="text-2xl font-bold mb-6">个人中心</h2>
+                    <div class="grid grid-cols-3 gap-8">
+                        <div class="col-span-1 card p-8 text-center">
+                            <div class="w-24 h-24 bg-tiffany-blue rounded-full mx-auto mb-4"></div>
+                            <h3 class="text-xl font-bold">我的昵称</h3>
+                            <p class="text-gray-400 text-sm">学员 ID: 202401</p>
+                            <button class="mt-6 w-full py-2 border rounded">修改资料</button>
+                        </div>
+                        <div class="col-span-2 grid grid-cols-2 gap-4">
+                            <div class="card p-6"><h4>我的爆文数</h4><p class="text-4xl font-bold text-tiffany-blue">12</p></div>
+                            <div class="card p-6"><h4>待办任务</h4><p class="text-4xl font-bold text-bean-red">2</p></div>
+                            <div class="card p-6 col-span-2">
+                                <h4 class="mb-4">最近发布排行</h4>
+                                <div class="flex justify-between text-sm border-b pb-2"><span>标题</span><span>阅读量</span></div>
+                                <div class="flex justify-between text-sm py-2"><span>AI写文案...</span><span>8.5k</span></div>
+                                <div class="flex justify-between text-sm py-2"><span>高效排版技巧...</span><span>2.1k</span></div>
+                            </div>
+                        </div>
+                    </div>`;
+            }
+        }
 
-        document.getElementById('entryForm').onsubmit = (e) => {
-            e.preventDefault();
-            const newItem = {
-                title: document.getElementById('title').value,
-                read: document.getElementById('r').value,
-                review: document.getElementById('review').value,
-                img: app.state.currentImg,
-                id: Date.now()
-            };
-            app.state.db.unshift(newItem);
-            localStorage.setItem('spark_final_db', JSON.stringify(app.state.db));
-            app.navigate('data');
-            app.closeModal();
-            app.state.currentImg = null;
-            document.getElementById('previewBox').classList.add('hidden');
-        };
-        window.onload = () => app.init();
+        function renderCharts() {
+            new Chart(document.getElementById('mainChart'), {
+                type: 'line',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{ label: '阅读量', data: [12000, 19000, 3000, 5000, 20000, 30000, 45000], borderColor: '#81D8D0', tension: 0.4 }]
+                }
+            });
+            new Chart(document.getElementById('pieChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Flowith', '听课笔记', '其他'],
+                    datasets: [{ data: [300, 50, 100], backgroundColor: ['#81D8D0', '#A3BBCE', '#D6CFBB'] }]
+                }
+            });
+        }
     </script>
 </body>
 </html>
