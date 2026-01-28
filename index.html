@@ -3,197 +3,489 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>星火计划 - 小红书爆文训练营管理系统</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>星火计划 | 小红书爆文训练营管理系统</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        :root {
-            --bg-light: #E9EDF0;
-            --tiffany-blue: #81D8D0;
-            --camel: #D6CFBB;
-            --bean-red: #D8575D;
-            --mist-blue: #A3BBCE;
-            --neutral-gray: #808080;
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        tiffany: '#81D8D0',   // 蒂芙尼蓝
+                        cloud: '#E9EDF0',     // 浅云大背景
+                        camel: '#d6cfbb',     // 浅米驼
+                        beanRed: '#d8575d',   // 复古豆沙红 (爆文/提醒)
+                        mistBlue: '#a3bbce',  // 雾霾蓝
+                        deepGray: '#808080',  // 中性深灰
+                        slateDeep: '#2A313D'  // 专业深灰色
+                    }
+                }
+            }
         }
-        body { background-color: var(--bg-light); font-family: "Microsoft YaHei", sans-serif; }
-        .sidebar-item { display: flex; align-items: center; padding: 12px 20px; transition: all 0.3s; color: var(--neutral-gray); cursor: pointer; }
-        .sidebar-item:hover, .sidebar-item.active { background-color: var(--tiffany-blue); color: white; }
-        .sidebar-item i { margin-right: 12px; width: 20px; text-align: center; }
-        .card { background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .viral-badge { background-color: var(--bean-red); color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px; }
-        .btn-primary { background-color: var(--tiffany-blue); color: white; }
-        .stat-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; background-color: var(--bean-red); animation: blink 1.5s infinite; }
-        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+    </script>
+    <style>
+        body { background-color: #E9EDF0; font-family: 'PingFang SC', system-ui, sans-serif; }
+        .nav-link { @apply flex items-center gap-4 px-6 py-4 rounded-xl transition-all cursor-pointer text-deepGray; }
+        .nav-active { @apply bg-white shadow-md text-tiffany font-bold; }
+        .nav-link i { width: 24px; text-align: center; }
+        .tech-card { @apply bg-white rounded-3xl shadow-sm border border-white p-6; }
+        .status-dot { @apply w-2 h-2 rounded-full inline-block mr-2; }
+        .viral-glow { box-shadow: 0 0 15px rgba(216, 87, 93, 0.3); }
+        /* 隐藏滚动条 */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: #81D8D0; border-radius: 10px; }
     </style>
 </head>
 <body class="flex h-screen overflow-hidden">
 
-    <div id="login-overlay" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="card p-8 w-80 text-center">
-            <h2 class="text-2xl font-bold mb-6 text-gray-700">星火计划登录</h2>
-            <button onclick="closeLogin()" class="w-full mb-4 py-3 border flex items-center justify-center gap-2 rounded-lg hover:bg-gray-50 transition">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/7/7e/WeChat_logo.svg" width="20"> 微信一键登录
-            </button>
-            <div class="text-gray-400 text-sm mb-4">或者</div>
-            <input type="text" placeholder="昵称 / 邮箱" class="w-full border p-2 mb-4 rounded">
-            <button onclick="closeLogin()" class="w-full btn-primary py-2 rounded-lg font-bold">进入系统</button>
+    <div id="loginOverlay" class="fixed inset-0 z-[100] bg-slateDeep/90 backdrop-blur-md flex items-center justify-center">
+        <div class="bg-white p-10 rounded-[2.5rem] w-full max-w-md shadow-2xl">
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-tiffany rounded-2xl mx-auto mb-4 flex items-center justify-center text-white shadow-lg shadow-tiffany/40">
+                    <i data-lucide="zap" class="w-8 h-8"></i>
+                </div>
+                <h2 class="text-2xl font-black text-slateDeep">星火计划登录</h2>
+                <p class="text-deepGray text-sm mt-2 font-medium italic">SPARK PRO MANAGEMENT SYSTEM</p>
+            </div>
+            <div class="space-y-4">
+                <div class="space-y-1">
+                    <label class="text-[10px] font-black text-deepGray uppercase ml-2">微信昵称 / 邮箱</label>
+                    <input type="text" id="loginName" placeholder="Enter your identity" class="w-full px-6 py-4 bg-cloud rounded-2xl border-none outline-none focus:ring-2 ring-tiffany">
+                </div>
+                <div class="flex gap-4 pt-4">
+                    <button onclick="app.login('member')" class="flex-1 py-4 bg-slateDeep text-white rounded-2xl font-bold hover:bg-black transition-all">学员登录</button>
+                    <button onclick="app.login('admin')" class="flex-1 py-4 bg-tiffany text-white rounded-2xl font-bold hover:bg-opacity-80 transition-all">管理员登录</button>
+                </div>
+            </div>
         </div>
     </div>
 
-    <nav class="w-64 bg-white border-r flex flex-col justify-between py-6">
-        <div>
-            <div class="px-6 mb-10">
-                <h1 class="text-xl font-bold text-gray-800 border-l-4 border-tiffany-blue pl-3">星火计划</h1>
-                <p class="text-xs text-gray-400 mt-1">爆文训练营管理系统</p>
+    <aside class="w-72 bg-white border-r border-gray-100 flex flex-col py-8 shrink-0">
+        <div class="px-8 mb-12 flex items-center gap-3">
+            <div class="w-8 h-8 bg-tiffany rounded-lg flex items-center justify-center text-white">
+                <i data-lucide="box" class="w-5 h-5"></i>
             </div>
-            <div class="sidebar-item active" onclick="showPage('dashboard')"><i>📊</i><span>看板</span></div>
-            <div class="sidebar-item" onclick="showPage('data')"><i>📂</i><span>数据</span></div>
-            <div class="sidebar-item" onclick="showPage('wall')"><i>🔥</i><span>爆文墙</span></div>
-            <div class="sidebar-item" onclick="showPage('mine')"><i>👤</i><span>我的</span></div>
+            <h1 class="text-xl font-black tracking-tighter text-slateDeep italic">SPARK <span class="text-tiffany">PLAN</span></h1>
         </div>
-        <div class="px-6">
-            <div class="text-xs text-gray-400 border-t pt-4 text-center">10年全栈专家 监制</div>
+
+        <nav class="flex-1 px-4 space-y-2">
+            <div onclick="app.navigate('dashboard')" id="nav-dashboard" class="nav-link nav-active">
+                <i data-lucide="layout-dashboard"></i><span>看板概览</span>
+            </div>
+            <div onclick="app.navigate('data')" id="nav-data" class="nav-link">
+                <i data-lucide="database"></i><span>管理数据</span>
+            </div>
+            <div onclick="app.navigate('wall')" id="nav-wall" class="nav-link">
+                <i data-lucide="layout-grid"></i><span>爆文瀑布流</span>
+            </div>
+            <div onclick="app.navigate('mine')" id="nav-mine" class="nav-link">
+                <i data-lucide="user-circle"></i><span>个人中心</span>
+            </div>
+        </nav>
+
+        <div class="px-8 mt-auto pt-8 border-t border-gray-50 text-center">
+            <p id="currentUserDisplay" class="text-xs font-bold text-slateDeep">未登录</p>
+            <p class="text-[10px] text-deepGray uppercase mt-1">Status: Online</p>
         </div>
-    </nav>
+    </aside>
 
-    <main class="flex-1 overflow-y-auto p-8" id="content-area">
-        <div id="page-dashboard">
-            <div class="flex justify-between items-end mb-8">
-                <div>
-                    <h2 class="text-3xl font-bold text-gray-800">运营数据概览</h2>
-                    <p class="text-gray-500">欢迎回来，今日营内新增 12 篇爆文！</p>
-                </div>
-                <div class="flex gap-4">
-                    <div class="card p-4 text-center bg-white">
-                        <p class="text-xs text-gray-400">当前爆文阈值</p>
-                        <p class="text-xl font-bold text-blue-500">> 5,000</p>
-                    </div>
+    <main class="flex-1 flex flex-col overflow-hidden">
+        <header class="h-20 px-10 flex items-center justify-between bg-white/50 border-b border-gray-100">
+            <h2 id="viewTitle" class="text-sm font-black text-slateDeep uppercase tracking-widest">Dashboard / 看板</h2>
+            <div class="flex items-center gap-4">
+                <div id="viralThresholdDisplay" class="text-xs font-bold bg-beanRed/10 text-beanRed px-4 py-2 rounded-full">
+                    爆文标准: 阅读 > 1000
                 </div>
             </div>
+        </header>
 
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
-                <div class="card p-6 border-b-4 border-tiffany-blue">
-                    <p class="text-gray-400 text-sm">总阅读量</p>
-                    <p class="text-3xl font-bold mt-2">1,284,900</p>
-                </div>
-                <div class="card p-6 border-b-4 border-mist-blue">
-                    <p class="text-gray-400 text-sm">总互动数</p>
-                    <p class="text-3xl font-bold mt-2">42,301</p>
-                </div>
-                <div class="card p-6 border-b-4 border-camel">
-                    <p class="text-gray-400 text-sm">本周爆文</p>
-                    <p class="text-3xl font-bold mt-2">156</p>
-                </div>
-                <div class="card p-6 border-b-4 border-bean-red">
-                    <p class="text-gray-400 text-sm">平均爆文率</p>
-                    <p class="text-3xl font-bold mt-2">18.5%</p>
-                </div>
+        <div id="mainContent" class="flex-1 overflow-y-auto p-10">
             </div>
-
-            <div class="grid grid-cols-2 gap-8">
-                <div class="card p-6">
-                    <h3 class="font-bold mb-4">近七日流量走势</h3>
-                    <canvas id="mainChart"></canvas>
-                </div>
-                <div class="card p-6">
-                    <h3 class="font-bold mb-4">内容赛道分布</h3>
-                    <canvas id="pieChart"></canvas>
-                </div>
-            </div>
-        </div>
     </main>
 
-    <button class="fixed bottom-8 right-8 w-14 h-14 rounded-full shadow-lg btn-primary text-3xl flex items-center justify-center hover:scale-110 transition cursor-pointer">+</button>
+    <div id="modal" class="fixed inset-0 z-50 hidden bg-slateDeep/60 backdrop-blur-sm flex items-center justify-center p-6">
+        <div class="bg-white w-full max-w-2xl rounded-[2.5rem] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
+            <div class="p-8 bg-slateDeep text-white flex justify-between items-center">
+                <div>
+                    <h3 class="text-xl font-black italic">NEW RECORD / 新增笔记</h3>
+                    <p class="text-[10px] opacity-50 uppercase tracking-widest mt-1">24H 节点回填数据及关键凭证</p>
+                </div>
+                <button onclick="app.closeModal()" class="w-10 h-10 rounded-full hover:bg-white/10 flex items-center justify-center"><i data-lucide="x"></i></button>
+            </div>
+            <form id="noteForm" class="p-8 grid grid-cols-2 gap-6">
+                <div class="space-y-1">
+                    <label class="text-[10px] font-black text-deepGray uppercase ml-1">笔记标题</label>
+                    <input type="text" id="m_title" required class="w-full px-5 py-3 bg-cloud rounded-xl border-none outline-none focus:ring-2 ring-tiffany">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[10px] font-black text-deepGray uppercase ml-1">笔记链接 (URL)</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="m_link" placeholder="小红书链接..." class="flex-1 px-5 py-3 bg-cloud rounded-xl border-none outline-none focus:ring-2 ring-tiffany text-sm">
+                        <button type="button" onclick="app.autoParse()" class="px-4 bg-mistBlue text-white rounded-xl text-xs font-bold">解析</button>
+                    </div>
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[10px] font-black text-deepGray uppercase ml-1">笔记类型</label>
+                    <select id="m_type" class="w-full px-5 py-3 bg-cloud rounded-xl border-none outline-none font-bold text-sm">
+                        <option>Flowith标签</option>
+                        <option>听课笔记</option>
+                        <option>其他类型</option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-3 gap-2 col-span-1">
+                    <div class="space-y-1">
+                        <label class="text-[9px] font-black text-deepGray uppercase ml-1 text-center block">阅读</label>
+                        <input type="number" id="v_read" value="0" class="w-full px-3 py-3 bg-cloud rounded-xl border-none outline-none text-center font-black">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[9px] font-black text-deepGray uppercase ml-1 text-center block">点赞</label>
+                        <input type="number" id="v_like" value="0" class="w-full px-3 py-3 bg-cloud rounded-xl border-none outline-none text-center font-black">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[9px] font-black text-deepGray uppercase ml-1 text-center block">收藏</label>
+                        <input type="number" id="v_star" value="0" class="w-full px-3 py-3 bg-cloud rounded-xl border-none outline-none text-center font-black">
+                    </div>
+                </div>
+                <div class="col-span-2 space-y-1">
+                    <label class="text-[10px] font-black text-deepGray uppercase ml-1">关键凭证 (封面/小眼睛截图)</label>
+                    <div class="w-full h-32 border-2 border-dashed border-tiffany/30 rounded-2xl flex flex-col items-center justify-center text-tiffany hover:bg-tiffany/5 transition-all cursor-pointer relative overflow-hidden" onclick="document.getElementById('fileInput').click()">
+                        <i data-lucide="upload-cloud"></i>
+                        <span class="text-[10px] font-bold mt-2 uppercase">Click to upload screenshot</span>
+                        <input type="file" id="fileInput" class="hidden" onchange="app.handleFile(this)">
+                        <img id="previewImg" class="absolute inset-0 w-full h-full object-cover hidden">
+                    </div>
+                </div>
+                <div class="col-span-2 space-y-1">
+                    <label class="text-[10px] font-black text-deepGray uppercase ml-1 italic">一句话复盘</label>
+                    <textarea id="m_review" maxlength="50" placeholder="总结这篇爆文的关键点..." class="w-full px-5 py-3 bg-cloud rounded-xl border-none outline-none h-20 text-sm"></textarea>
+                </div>
+                <button type="submit" id="saveBtn" class="col-span-2 py-4 bg-tiffany text-white font-black rounded-2xl shadow-xl shadow-tiffany/30 hover:bg-slateDeep transition-all uppercase tracking-widest">
+                    Save Record / 保存数据
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <button onclick="app.openModal()" class="fixed bottom-10 right-10 w-16 h-16 bg-tiffany text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-40">
+        <i data-lucide="plus" class="w-8 h-8"></i>
+    </button>
 
     <script>
-        function closeLogin() { document.getElementById('login-overlay').style.display = 'none'; renderCharts(); }
-        
-        function showPage(pageId) {
-            const area = document.getElementById('content-area');
-            document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
-            event.currentTarget.classList.add('active');
-            
-            if(pageId === 'data') {
-                area.innerHTML = `
-                    <h2 class="text-2xl font-bold mb-6">笔记数据管理</h2>
-                    <div class="flex gap-4 mb-6">
-                        <select class="p-2 rounded border"><option>所有赛道</option><option>Flowith标签</option></select>
-                        <select class="p-2 rounded border"><option>所有状态</option><option>爆文</option><option>待更新</option></select>
+        const app = {
+            state: {
+                user: null,
+                role: 'member',
+                view: 'dashboard',
+                threshold: 1000,
+                currentImg: 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=400',
+                db: JSON.parse(localStorage.getItem('spark_db')) || [
+                    { id: 1, user: '系统演示', title: 'Flowith实操指南', type: 'Flowith标签', read: 1200, like: 150, star: 80, time: '2024-05-20', viral: true, img: 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=400', review: '钩子开头很有用' }
+                ]
+            },
+
+            init() {
+                lucide.createIcons();
+                this.navigate('dashboard');
+            },
+
+            login(role) {
+                const name = document.getElementById('loginName').value;
+                if(!name) return alert('请输入昵称或邮箱');
+                this.state.user = name;
+                this.state.role = role;
+                document.getElementById('loginOverlay').classList.add('hidden');
+                document.getElementById('currentUserDisplay').innerText = `USER: ${name}`;
+                this.navigate('dashboard');
+            },
+
+            navigate(view) {
+                this.state.view = view;
+                document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('nav-active'));
+                document.getElementById(`nav-${view}`).classList.add('nav-active');
+                document.getElementById('viewTitle').innerText = `${view} / 页面控制台`;
+                
+                const container = document.getElementById('mainContent');
+                container.innerHTML = '';
+
+                switch(view) {
+                    case 'dashboard': this.renderDashboard(container); break;
+                    case 'data': this.renderDataTable(container); break;
+                    case 'wall': this.renderWall(container); break;
+                    case 'mine': this.renderMine(container); break;
+                }
+                lucide.createIcons();
+            },
+
+            renderDashboard(el) {
+                const myData = this.state.db.filter(i => i.user === this.state.user);
+                const totalReads = this.state.db.reduce((a, b) => a + parseInt(b.read), 0);
+                
+                el.innerHTML = `
+                    <div class="grid grid-cols-4 gap-6 mb-10">
+                        <div class="tech-card border-b-4 border-tiffany">
+                            <p class="text-deepGray text-[10px] font-black uppercase">全营总阅读量</p>
+                            <h4 class="text-3xl font-black text-slateDeep mt-2">${totalReads.toLocaleString()}</h4>
+                        </div>
+                        <div class="tech-card border-b-4 border-beanRed">
+                            <p class="text-deepGray text-[10px] font-black uppercase">本周爆文产出</p>
+                            <h4 class="text-3xl font-black text-slateDeep mt-2">${this.state.db.filter(i => i.viral).length}</h4>
+                        </div>
+                        <div class="tech-card border-b-4 border-mistBlue">
+                            <p class="text-deepGray text-[10px] font-black uppercase">我的爆文率</p>
+                            <h4 class="text-3xl font-black text-slateDeep mt-2">${myData.length ? ((myData.filter(i=>i.viral).length / myData.length)*100).toFixed(1) : 0}%</h4>
+                        </div>
+                        <div class="tech-card border-b-4 border-camel">
+                            <p class="text-deepGray text-[10px] font-black uppercase">营运总人数</p>
+                            <h4 class="text-3xl font-black text-slateDeep mt-2">128</h4>
+                        </div>
                     </div>
-                    <div class="card overflow-hidden">
-                        <table class="w-full text-left">
-                            <thead class="bg-gray-50 border-b">
-                                <tr>
-                                    <th class="p-4">发布者</th><th class="p-4">笔记标题</th><th class="p-4">阅读量 <span class="text-[10px]">▼</span></th><th class="p-4">状态</th><th class="p-4">操作</th>
+                    <div class="grid grid-cols-3 gap-6">
+                        <div class="col-span-2 tech-card h-[400px]">
+                            <h3 class="font-black text-slateDeep mb-4 flex items-center gap-2"><i data-lucide="bar-chart-3" class="w-5 h-5"></i> 流量趋势可视化</h3>
+                            <canvas id="trendChart"></canvas>
+                        </div>
+                        <div class="tech-card">
+                            <h3 class="font-black text-slateDeep mb-4">本周数据榜单 Top 5</h3>
+                            <div class="space-y-4">
+                                ${this.state.db.sort((a,b)=>b.read - a.read).slice(0,5).map((item, idx) => `
+                                    <div class="flex items-center gap-3">
+                                        <span class="w-6 h-6 rounded bg-cloud text-[10px] font-black flex items-center justify-center">${idx+1}</span>
+                                        <div class="flex-1">
+                                            <p class="text-xs font-bold truncate">${item.title}</p>
+                                            <p class="text-[9px] text-deepGray">${item.user}</p>
+                                        </div>
+                                        <span class="text-xs font-black text-tiffany">${item.read}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                this.initChart();
+            },
+
+            renderDataTable(el) {
+                el.innerHTML = `
+                    <div class="tech-card p-0 overflow-hidden">
+                        <div class="p-6 border-b border-gray-50 flex justify-between bg-gray-50/50">
+                            <div class="flex gap-4">
+                                <select class="bg-white border-none rounded-xl px-4 py-2 text-xs font-bold shadow-sm outline-none">
+                                    <option>所有类型</option><option>Flowith标签</option>
+                                </select>
+                                <select class="bg-white border-none rounded-xl px-4 py-2 text-xs font-bold shadow-sm outline-none">
+                                    <option>所有状态</option><option>爆文</option><option>待回填</option>
+                                </select>
+                            </div>
+                            <button class="bg-slateDeep text-white px-6 py-2 rounded-xl text-xs font-bold">导出周报</button>
+                        </div>
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="text-[10px] font-black text-deepGray uppercase bg-white">
+                                    <th class="px-8 py-4">发布者</th>
+                                    <th class="px-8 py-4">笔记内容</th>
+                                    <th class="px-8 py-4">数据(阅/赞/藏)</th>
+                                    <th class="px-8 py-4">状态</th>
+                                    <th class="px-8 py-4">操作</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                <tr class="border-b">
-                                    <td class="p-4 text-sm">张三</td><td class="p-4 font-medium">如何用AI写爆款文案...</td><td class="p-4">12,405</td><td class="p-4"><span class="viral-badge">爆文</span></td><td class="p-4 text-blue-500 cursor-pointer">编辑</td>
-                                </tr>
-                                <tr class="border-b">
-                                    <td class="p-4 text-sm">李四</td><td class="p-4 font-medium">我的第一周学习心得</td><td class="p-4">421</td><td class="p-4"><span class="stat-dot mr-2"></span>待更新</td><td class="p-4 text-blue-500 cursor-pointer">回填</td>
-                                </tr>
+                            <tbody class="divide-y divide-gray-50">
+                                ${this.state.db.map(item => `
+                                    <tr class="hover:bg-cloud/20 transition-colors">
+                                        <td class="px-8 py-4 font-bold text-xs">${item.user}</td>
+                                        <td class="px-8 py-4">
+                                            <p class="text-xs font-black text-slateDeep">${item.title}</p>
+                                            <p class="text-[9px] text-deepGray mt-1">${item.type} | ${item.time}</p>
+                                        </td>
+                                        <td class="px-8 py-4 font-mono text-xs text-tiffany font-bold">
+                                            ${item.read} / ${item.like} / ${item.star}
+                                        </td>
+                                        <td class="px-8 py-4">
+                                            ${item.viral ? 
+                                                `<span class="bg-beanRed/10 text-beanRed text-[9px] font-black px-3 py-1 rounded-full italic shadow-sm shadow-beanRed/10 viral-glow">★ 爆款</span>` : 
+                                                `<span class="bg-cloud text-deepGray text-[9px] font-black px-3 py-1 rounded-full">常规</span>`}
+                                        </td>
+                                        <td class="px-8 py-4">
+                                            <button class="w-8 h-8 bg-cloud rounded-lg flex items-center justify-center text-slateDeep hover:bg-tiffany hover:text-white transition-all">
+                                                <i data-lucide="edit-3" class="w-4 h-4"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                `).join('')}
                             </tbody>
                         </table>
-                    </div>`;
-            } else if(pageId === 'wall') {
-                area.innerHTML = `
-                    <h2 class="text-2xl font-bold mb-6">本周爆文墙</h2>
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                        ${[1,2,3,4].map(i => `
-                            <div class="card overflow-hidden group">
-                                <div class="relative h-64 bg-gray-200">
-                                    <div class="absolute bottom-2 left-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded">👁️ ${i*2}k</div>
-                                    <img src="https://via.placeholder.com/300x400?text=Cover+${i}" class="w-full h-full object-cover">
+                    </div>
+                `;
+            },
+
+            renderWall(el) {
+                const virals = this.state.db.filter(i => i.viral);
+                el.innerHTML = `
+                    <div class="columns-1 sm:columns-2 md:columns-4 gap-6 space-y-6">
+                        ${virals.map(item => `
+                            <div class="tech-card p-0 break-inside-avoid overflow-hidden group cursor-pointer hover:scale-[1.02] transition-transform">
+                                <div class="relative">
+                                    <img src="${item.img}" class="w-full object-cover max-h-72">
+                                    <div class="absolute bottom-3 left-3 bg-black/60 backdrop-blur-md text-white px-3 py-1 rounded-full text-[10px] font-black flex items-center gap-1">
+                                        <i data-lucide="eye" class="w-3 h-3"></i> ${item.read}
+                                    </div>
                                 </div>
-                                <div class="p-4">
-                                    <p class="font-bold text-sm truncate">爆款标题示范案 ${i}</p>
-                                    <p class="text-xs text-gray-400 mt-1">复盘：钩子开头效果极佳...</p>
+                                <div class="p-5">
+                                    <h4 class="font-black text-sm text-slateDeep line-clamp-1">${item.title}</h4>
+                                    <p class="text-[10px] text-deepGray mt-2 font-medium">复盘: ${item.review}</p>
+                                    <div class="mt-4 flex items-center justify-between border-t pt-3">
+                                        <span class="text-[9px] font-black text-tiffany uppercase">${item.user}</span>
+                                        <span class="text-[9px] text-deepGray">${item.time}</span>
+                                    </div>
                                 </div>
                             </div>
                         `).join('')}
-                    </div>`;
-            } else if(pageId === 'mine') {
-                area.innerHTML = `
-                    <h2 class="text-2xl font-bold mb-6">个人中心</h2>
+                    </div>
+                `;
+            },
+
+            renderMine(el) {
+                const myData = this.state.db.filter(i => i.user === this.state.user);
+                el.innerHTML = `
                     <div class="grid grid-cols-3 gap-8">
-                        <div class="col-span-1 card p-8 text-center">
-                            <div class="w-24 h-24 bg-tiffany-blue rounded-full mx-auto mb-4"></div>
-                            <h3 class="text-xl font-bold">我的昵称</h3>
-                            <p class="text-gray-400 text-sm">学员 ID: 202401</p>
-                            <button class="mt-6 w-full py-2 border rounded">修改资料</button>
-                        </div>
-                        <div class="col-span-2 grid grid-cols-2 gap-4">
-                            <div class="card p-6"><h4>我的爆文数</h4><p class="text-4xl font-bold text-tiffany-blue">12</p></div>
-                            <div class="card p-6"><h4>待办任务</h4><p class="text-4xl font-bold text-bean-red">2</p></div>
-                            <div class="card p-6 col-span-2">
-                                <h4 class="mb-4">最近发布排行</h4>
-                                <div class="flex justify-between text-sm border-b pb-2"><span>标题</span><span>阅读量</span></div>
-                                <div class="flex justify-between text-sm py-2"><span>AI写文案...</span><span>8.5k</span></div>
-                                <div class="flex justify-between text-sm py-2"><span>高效排版技巧...</span><span>2.1k</span></div>
+                        <div class="col-span-1 space-y-6">
+                            <div class="tech-card text-center py-12 bg-slateDeep text-white">
+                                <div class="w-24 h-24 rounded-[2rem] bg-tiffany mx-auto mb-6 flex items-center justify-center shadow-2xl">
+                                    <i data-lucide="user" class="w-10 h-10"></i>
+                                </div>
+                                <h3 class="text-2xl font-black">${this.state.user}</h3>
+                                <p class="text-tiffany text-xs font-black uppercase mt-1">Spark Pro Member</p>
+                                <div class="flex gap-4 mt-8 px-4">
+                                    <div class="flex-1 bg-white/5 py-3 rounded-2xl border border-white/10">
+                                        <p class="text-[10px] opacity-40 uppercase font-black">Rank</p>
+                                        <p class="text-lg font-black">#12</p>
+                                    </div>
+                                    <div class="flex-1 bg-white/5 py-3 rounded-2xl border border-white/10">
+                                        <p class="text-[10px] opacity-40 uppercase font-black">Points</p>
+                                        <p class="text-lg font-black">1280</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tech-card">
+                                <h4 class="text-xs font-black text-slateDeep uppercase mb-4 tracking-widest italic">待完成任务</h4>
+                                <div class="space-y-3">
+                                    <div class="flex items-center gap-3 p-3 bg-beanRed/5 rounded-2xl border border-beanRed/10">
+                                        <div class="w-2 h-2 rounded-full bg-beanRed animate-pulse"></div>
+                                        <span class="text-xs font-bold text-beanRed">回填昨日笔记数据</span>
+                                        <span class="ml-auto text-[9px] bg-beanRed text-white px-2 py-0.5 rounded">24H节点</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>`;
-            }
-        }
+                        <div class="col-span-2 space-y-6">
+                            <div class="tech-card">
+                                <h3 class="font-black text-slateDeep mb-6">我的发布排行 (最近1周)</h3>
+                                <div class="space-y-4">
+                                    ${myData.sort((a,b)=>b.read-a.read).map(item => `
+                                        <div class="flex items-center justify-between p-4 bg-cloud/30 rounded-2xl">
+                                            <div class="flex items-center gap-4">
+                                                <img src="${item.img}" class="w-12 h-12 rounded-xl object-cover">
+                                                <div>
+                                                    <p class="text-sm font-black text-slateDeep">${item.title}</p>
+                                                    <p class="text-[9px] text-deepGray">${item.time}</p>
+                                                </div>
+                                            </div>
+                                            <div class="text-right">
+                                                <p class="text-lg font-black text-tiffany">${item.read}</p>
+                                                <p class="text-[9px] font-black text-deepGray uppercase">Reading</p>
+                                            </div>
+                                        </div>
+                                    `).join('') || '<p class="text-center py-20 text-deepGray text-xs font-bold italic">暂无发布内容</p>'}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            },
 
-        function renderCharts() {
-            new Chart(document.getElementById('mainChart'), {
-                type: 'line',
-                data: {
-                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-                    datasets: [{ label: '阅读量', data: [12000, 19000, 3000, 5000, 20000, 30000, 45000], borderColor: '#81D8D0', tension: 0.4 }]
+            initChart() {
+                const ctx = document.getElementById('trendChart');
+                if(!ctx) return;
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                        datasets: [{
+                            label: '阅读增长率',
+                            data: [1200, 3400, 2100, 5600, 8900, 12000, 15000],
+                            borderColor: '#81D8D0',
+                            backgroundColor: 'rgba(129, 216, 208, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        }]
+                    },
+                    options: { 
+                        responsive: true, 
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: { y: { display: false }, x: { grid: { display: false } } }
+                    }
+                });
+            },
+
+            autoParse() {
+                const link = document.getElementById('m_link').value;
+                if(!link) return alert('请先粘贴链接');
+                document.getElementById('m_title').value = "解析成功: 小红书笔记 #" + Math.floor(Math.random()*9000);
+                document.getElementById('saveBtn').innerText = "Loading...";
+                setTimeout(() => {
+                    document.getElementById('saveBtn').innerText = "Save Record / 保存数据";
+                    alert('✅ 智能解析完成！标题已自动提取。');
+                }, 800);
+            },
+
+            handleFile(input) {
+                if (input.files && input.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        this.state.currentImg = e.target.result;
+                        document.getElementById('previewImg').src = e.target.result;
+                        document.getElementById('previewImg').classList.remove('hidden');
+                    };
+                    reader.readAsDataURL(input.files[0]);
                 }
-            });
-            new Chart(document.getElementById('pieChart'), {
-                type: 'doughnut',
-                data: {
-                    labels: ['Flowith', '听课笔记', '其他'],
-                    datasets: [{ data: [300, 50, 100], backgroundColor: ['#81D8D0', '#A3BBCE', '#D6CFBB'] }]
-                }
-            });
-        }
+            },
+
+            openModal() { document.getElementById('modal').classList.remove('hidden'); },
+            closeModal() { document.getElementById('modal').classList.add('hidden'); },
+
+            saveData() {
+                const title = document.getElementById('m_title').value;
+                const read = parseInt(document.getElementById('v_read').value);
+                
+                const newItem = {
+                    id: Date.now(),
+                    user: this.state.user,
+                    title: title,
+                    type: document.getElementById('m_type').value,
+                    read: read,
+                    like: document.getElementById('v_like').value,
+                    star: document.getElementById('v_star').value,
+                    time: new Date().toISOString().split('T')[0],
+                    viral: read >= this.state.threshold,
+                    img: this.state.currentImg,
+                    review: document.getElementById('m_review').value
+                };
+
+                this.state.db.unshift(newItem);
+                localStorage.setItem('spark_db', JSON.stringify(this.state.db));
+                this.closeModal();
+                this.navigate(this.state.view);
+                alert('✅ 数据录入成功！');
+            }
+        };
+
+        document.getElementById('noteForm').onsubmit = (e) => {
+            e.preventDefault();
+            app.saveData();
+        };
+
+        window.onload = () => app.init();
     </script>
 </body>
 </html>
