@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>星火计划 | 复古协作系统</title>
+    <title>星火计划 | 数据统计</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script>
@@ -11,292 +11,247 @@
             theme: {
                 extend: {
                     colors: {
-                        beige: '#D6CFBB',     // 浅米驼 (大背景)
-                        dustyRed: '#D8575D',  // 复古豆沙红 (爆文/高亮)
-                        mistyBlue: '#A3BBCE', // 雾霾浅蓝 (选中/数据)
-                        neutralGray: '#808080'// 中性深灰 (导航/边框)
+                        tiffany: '#81D8D0',   // 蒂芙尼蓝
+                        cloud: '#E9EDF0',     // 浅云
+                        slateDeep: '#2A313D', // 青灰
+                        acidPurple: '#5B34C1',// 酸性紫
+                        mintBlue: '#04789E',  // 薄荷浅青
                     }
                 }
             }
         }
     </script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&display=swap');
+        body { background-color: #E9EDF0; color: #2A313D; font-family: 'Inter', system-ui, sans-serif; }
         
-        body { background-color: #D6CFBB; color: #333; font-family: 'Noto Serif SC', serif; }
+        /* 导航对齐与框选 */
+        .nav-link { @apply flex items-center gap-4 px-6 py-4 rounded-2xl border border-transparent transition-all; }
+        .nav-active { @apply border-tiffany bg-slateDeep text-tiffany shadow-lg; }
+        .nav-link:hover:not(.nav-active) { @apply bg-white border-gray-200; }
+
+        /* 上传区域 */
+        .upload-zone { @apply border-2 border-dashed border-acidPurple/30 rounded-2xl p-6 text-center cursor-pointer hover:bg-acidPurple/5 transition-all; }
         
-        /* 侧边导航逻辑 */
-        .nav-btn { @apply flex flex-col items-center justify-center gap-1 py-6 transition-all border-b border-black/5 text-neutralGray; }
-        .nav-active { @apply bg-white/40 text-dustyRed border-r-4 border-r-dustyRed; }
+        /* 科技感卡片 */
+        .tech-card { @apply bg-white rounded-[2rem] border border-white shadow-sm overflow-hidden; }
         
-        /* 复古纸张卡片 */
-        .retro-card { background: #FCF9F2; border: 1px solid #C9C0A8; box-shadow: 2px 2px 0px #B5AD96; }
-        .retro-input { background: #F2EEE4; border: 1px solid #B5AD96; border-radius: 4px; padding: 10px; outline: none; }
-        
-        /* 隐藏滚动条 */
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-thumb { background: #A3BBCE; }
+        /* 图片预览小眼睛 */
+        .preview-eye { @apply absolute inset-0 bg-acidPurple/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all cursor-pointer rounded-xl; }
     </style>
 </head>
 <body class="flex h-screen overflow-hidden">
 
-    <aside class="w-24 bg-[#CFC8B4] border-r border-[#B5AD96] flex flex-col shrink-0">
-        <div class="h-24 flex items-center justify-center border-b border-[#B5AD96]">
-            <div class="w-10 h-10 bg-dustyRed rounded-full flex items-center justify-center shadow-inner">
-                <i data-lucide="flame" class="text-beige w-6 h-6"></i>
+    <aside class="w-72 bg-white/80 backdrop-blur-xl border-r border-gray-200 flex flex-col p-8 shrink-0">
+        <div class="flex items-center gap-4 mb-12 px-2">
+            <div class="w-10 h-10 bg-acidPurple rounded-xl flex items-center justify-center">
+                <i data-lucide="shield-check" class="text-white w-6 h-6"></i>
             </div>
+            <h1 class="font-black text-2xl tracking-tighter text-slateDeep italic">SPARK <span class="text-tiffany italic">PRO</span></h1>
         </div>
 
-        <nav class="flex-1 overflow-y-auto">
-            <button onclick="app.navigate('dashboard')" id="nav-dashboard" class="nav-btn w-full nav-active">
-                <i data-lucide="compass" class="w-6 h-6"></i>
-                <span class="text-xs font-bold">看板</span>
+        <nav class="space-y-4 flex-1">
+            <button onclick="app.navigate('dashboard')" id="nav-dashboard" class="nav-link w-full nav-active">
+                <div class="w-6 flex justify-center"><i data-lucide="monitor"></i></div>
+                <span class="font-bold tracking-wide">看板</span>
             </button>
-            <button onclick="app.navigate('data')" id="nav-data" class="nav-btn w-full">
-                <i data-lucide="scroll-text" class="w-6 h-6"></i>
-                <span class="text-xs font-bold">数据</span>
+            <button onclick="app.navigate('data')" id="nav-data" class="nav-link w-full text-gray-400">
+                <div class="w-6 flex justify-center"><i data-lucide="database"></i></div>
+                <span class="font-bold tracking-wide">数据</span>
             </button>
-            <button onclick="app.navigate('wall')" id="nav-wall" class="nav-btn w-full">
-                <i data-lucide="layout-grid" class="w-6 h-6"></i>
-                <span class="text-xs font-bold">爆文墙</span>
+            <button onclick="app.navigate('wall')" id="nav-wall" class="nav-link w-full text-gray-400">
+                <div class="w-6 flex justify-center"><i data-lucide="flame"></i></div>
+                <span class="font-bold tracking-wide">爆文墙</span>
             </button>
-            <button onclick="app.navigate('mine')" id="nav-mine" class="nav-btn w-full border-b-0">
-                <i data-lucide="user-square-2" class="w-6 h-6"></i>
-                <span class="text-xs font-bold">我的</span>
+            <button onclick="app.navigate('mine')" id="nav-mine" class="nav-link w-full text-gray-400">
+                <div class="w-6 flex justify-center"><i data-lucide="user-cog"></i></div>
+                <span class="font-bold tracking-wide">我的</span>
             </button>
         </nav>
-
-        <div class="p-4 text-center border-t border-[#B5AD96]">
-            <p class="text-[9px] text-neutralGray uppercase leading-tight font-bold">Spark<br>2026</p>
-        </div>
     </aside>
 
     <main class="flex-1 flex flex-col overflow-hidden">
-        <header class="h-20 flex items-center justify-between px-10 border-b border-[#B5AD96]/50">
-            <div>
-                <h2 id="page-title" class="text-xl font-bold text-gray-700 tracking-widest">看板 / DASHBOARD</h2>
-                <div class="h-1 w-10 bg-dustyRed mt-1"></div>
-            </div>
-            
-            <div class="flex items-center gap-6">
-                <div class="text-right hidden md:block">
-                    <p class="text-[10px] text-neutralGray font-bold italic uppercase">Synchronizing...</p>
-                    <p id="user-info" class="text-sm font-bold text-gray-600">欢迎, 星火学员</p>
-                </div>
-                <button onclick="app.openModal()" class="bg-dustyRed px-6 py-3 text-white text-xs font-bold tracking-widest rounded-sm shadow-[3px_3px_0px_#801115] active:translate-y-[2px] active:shadow-none transition-all">
-                    录入成果
-                </button>
-            </div>
+        <header class="h-24 px-12 flex items-center justify-between border-b border-gray-200 bg-white/50">
+            <h2 id="page-title" class="text-xl font-black text-slateDeep uppercase tracking-widest">System Control / 录入系统</h2>
+            <button onclick="app.openModal()" class="bg-acidPurple px-8 py-4 rounded-2xl text-white font-black text-sm shadow-xl shadow-acidPurple/30 active:scale-95 transition-all">
+                + 新增笔记记录
+            </button>
         </header>
 
-        <section id="content-area" class="flex-1 overflow-y-auto p-10 space-y-8">
+        <section id="main-content" class="flex-1 overflow-y-auto p-12">
             </section>
     </main>
 
-    <div id="modal" class="fixed inset-0 z-50 hidden bg-black/30 backdrop-blur-[2px] flex items-center justify-center p-4">
-        <div class="retro-card w-full max-w-lg p-10 animate-in fade-in slide-in-from-bottom-4 duration-300">
-            <div class="flex justify-between items-center mb-8 border-b-2 border-black pb-4">
-                <h3 class="text-xl font-bold italic tracking-tighter uppercase">Entry / 新增记录</h3>
-                <button onclick="app.closeModal()"><i data-lucide="x-circle" class="text-neutralGray"></i></button>
-            </div>
-            <form id="entryForm" class="space-y-5">
-                <div class="space-y-2">
-                    <label class="text-xs font-bold uppercase text-neutralGray">Note Link / 笔记链接</label>
-                    <div class="flex gap-2">
-                        <input type="text" id="link" class="retro-input flex-1" placeholder="在此粘贴...">
-                        <button type="button" onclick="app.aiParse()" class="bg-mistyBlue px-4 text-white text-xs font-bold uppercase">解析</button>
-                    </div>
+    <div id="modal" class="fixed inset-0 z-50 hidden bg-slateDeep/80 backdrop-blur-md flex items-center justify-center p-6">
+        <div class="bg-white w-full max-w-2xl rounded-[3rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="p-10 bg-slateDeep text-white flex justify-between items-center">
+                <div>
+                    <h3 class="font-black text-2xl text-tiffany tracking-tighter">NEW RECORD</h3>
+                    <p class="text-[10px] opacity-40 uppercase tracking-widest font-bold mt-1">关键凭证与数据存档</p>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <button onclick="app.closeModal()" class="w-12 h-12 rounded-full hover:bg-white/10 flex items-center justify-center transition-colors"><i data-lucide="x"></i></button>
+            </div>
+
+            <form id="noteForm" class="p-10 space-y-8 overflow-y-auto">
+                <div class="grid grid-cols-2 gap-6">
                     <div class="space-y-2">
-                        <label class="text-xs font-bold uppercase text-neutralGray">Title / 标题</label>
-                        <input type="text" id="title" class="retro-input w-full" required>
+                        <label class="text-[10px] font-black text-gray-400 uppercase">笔记标题</label>
+                        <input type="text" id="m_title" required class="w-full px-6 py-4 bg-cloud rounded-2xl border-none focus:ring-2 ring-tiffany/50 outline-none">
                     </div>
                     <div class="space-y-2">
-                        <label class="text-xs font-bold uppercase text-neutralGray">Type / 类型</label>
-                        <select id="type" class="retro-input w-full">
-                            <option>Flowith实操</option>
+                        <label class="text-[10px] font-black text-gray-400 uppercase">发布类型</label>
+                        <select id="m_type" class="w-full px-6 py-4 bg-cloud rounded-2xl border-none outline-none font-bold">
+                            <option>flowith标签</option>
                             <option>听课笔记</option>
+                            <option>其他类型（需说明）</option>
                         </select>
                     </div>
                 </div>
-                <div class="grid grid-cols-4 gap-2">
-                    <div class="text-center"><p class="text-[10px] mb-1">阅读</p><input id="r" type="number" class="retro-input w-full text-center"></div>
-                    <div class="text-center"><p class="text-[10px] mb-1">点赞</p><input id="l" type="number" class="retro-input w-full text-center"></div>
-                    <div class="text-center"><p class="text-[10px] mb-1">收藏</p><input id="s" type="number" class="retro-input w-full text-center"></div>
-                    <div class="text-center"><p class="text-[10px] mb-1">评论</p><input id="c" type="number" class="retro-input w-full text-center"></div>
+
+                <div class="space-y-2">
+                    <label class="text-[10px] font-black text-gray-400 uppercase">关键凭证上传 (封面/数据截图)</label>
+                    <div class="flex gap-4">
+                        <div id="uploadContainer" onclick="document.getElementById('fileInput').click()" class="upload-zone flex-1">
+                            <i data-lucide="image-plus" class="w-8 h-8 mx-auto text-acidPurple mb-2"></i>
+                            <p class="text-xs font-bold text-slateDeep">点击上传封面或数据截图</p>
+                            <input type="file" id="fileInput" class="hidden" accept="image/*" onchange="app.handleUpload(this)">
+                        </div>
+                        <div id="imagePreview" class="w-32 h-32 hidden relative group">
+                            <img id="previewImg" src="" class="w-full h-full object-cover rounded-2xl border-2 border-tiffany shadow-md">
+                            <div class="preview-eye" onclick="app.viewLargeImage()">
+                                <i data-lucide="eye" class="text-white w-6 h-6"></i>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <button type="submit" class="w-full bg-black py-4 text-white font-bold uppercase tracking-widest hover:bg-dustyRed transition-colors">Confirm & Sync / 确认同步</button>
+
+                <div class="grid grid-cols-4 gap-4">
+                    <div class="bg-cloud p-4 rounded-2xl text-center">
+                        <p class="text-[9px] font-bold text-gray-400 mb-1">阅读</p>
+                        <input id="v_read" type="number" value="0" class="w-full bg-transparent text-center font-black text-xl text-acidPurple border-none outline-none">
+                    </div>
+                    <div class="bg-cloud p-4 rounded-2xl text-center">
+                        <p class="text-[9px] font-bold text-gray-400 mb-1">点赞</p>
+                        <input id="v_like" type="number" value="0" class="w-full bg-transparent text-center font-black text-xl text-slateDeep border-none outline-none">
+                    </div>
+                    </div>
+
+                <div class="space-y-2">
+                    <label class="text-[10px] font-black text-gray-400 uppercase italic">一句话复盘</label>
+                    <textarea id="m_review" placeholder="这篇笔记做对了什么？哪里可以优化？" class="w-full px-6 py-4 bg-cloud rounded-2xl border-none outline-none h-24 text-sm"></textarea>
+                </div>
+
+                <button type="submit" class="w-full py-6 bg-acidPurple text-white font-black rounded-3xl shadow-2xl shadow-acidPurple/30 hover:bg-tiffany hover:text-slateDeep transition-all uppercase tracking-widest">
+                    Save Record / 保存记录
+                </button>
             </form>
         </div>
+    </div>
+
+    <div id="largePreview" class="fixed inset-0 z-[100] hidden bg-slateDeep/95 flex items-center justify-center p-10" onclick="this.classList.add('hidden')">
+        <img id="largeImg" src="" class="max-w-full max-h-full rounded-xl shadow-2xl border-4 border-white/10">
+        <p class="absolute bottom-10 text-white font-black uppercase tracking-widest">点击任意处关闭预览</p>
     </div>
 
     <script>
         const app = {
             state: {
-                view: 'dashboard',
-                user: localStorage.getItem('spark_user') || '星火学员',
-                db: JSON.parse(localStorage.getItem('spark_db_retro')) || [
-                    { id: 1, user: '李火火', title: '2026星火实操：AI内容分发逻辑', type: 'Flowith', read: 12500, like: 890, hot: true, status: '爆文', time: '2026-01-27' },
-                    { id: 2, user: '张小火', title: '复盘：新手如何快速拿到流量反馈', type: '听课笔记', read: 450, like: 32, hot: false, status: '待更新', time: '2026-01-28' },
-                ]
+                view: 'data',
+                currentImg: null,
+                db: JSON.parse(localStorage.getItem('spark_pro_db')) || []
             },
 
             init() {
                 lucide.createIcons();
-                this.navigate('dashboard');
-                document.getElementById('user-info').innerText = `欢迎, ${this.state.user}`;
+                this.navigate('data');
             },
 
             navigate(v) {
                 this.state.view = v;
-                // UI 切换
-                ['dashboard', 'data', 'wall', 'mine'].forEach(i => {
-                    const el = document.getElementById(`nav-${i}`);
-                    el.className = `nav-btn w-full ${v === i ? 'nav-active' : ''}`;
-                });
-
-                const el = document.getElementById('content-area');
-                const title = document.getElementById('page-title');
-
-                if(v === 'dashboard') {
-                    title.innerText = '看板 / DASHBOARD';
-                    this.renderDashboard(el);
-                } else if(v === 'data') {
-                    title.innerText = '数据 / DATA LIST';
-                    this.renderData(el);
-                } else if(v === 'mine') {
-                    title.innerText = '我的 / MY PROFILE';
-                    this.renderMine(el);
-                }
+                document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('nav-active'));
+                document.getElementById(`nav-${v}`).classList.add('nav-active');
+                
+                const content = document.getElementById('main-content');
+                if(v === 'data') this.renderTable(content);
                 lucide.createIcons();
             },
 
-            renderDashboard(el) {
-                const totalReads = this.state.db.reduce((a, b) => a + b.read, 0);
-                const hotCount = this.state.db.filter(i => i.hot).length;
-
-                el.innerHTML = `
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                        <div class="retro-card p-6 flex flex-col items-center">
-                            <span class="text-[10px] font-black text-neutralGray uppercase tracking-widest">Total Readings</span>
-                            <span class="text-4xl font-bold mt-2">${totalReads.toLocaleString()}</span>
-                        </div>
-                        <div class="retro-card p-6 flex flex-col items-center border-t-4 border-t-dustyRed">
-                            <span class="text-[10px] font-black text-neutralGray uppercase tracking-widest">Hot Articles</span>
-                            <span class="text-4xl font-bold mt-2 text-dustyRed">${hotCount}</span>
-                        </div>
-                    </div>
-                    <div class="retro-card p-8">
-                        <h4 class="font-bold border-b border-[#B5AD96] pb-4 mb-6 italic italic uppercase">Realtime Ranking / 全员实时榜单</h4>
-                        <div class="space-y-4">
-                            ${this.state.db.sort((a,b)=>b.read - a.read).map((n, i) => `
-                                <div class="flex items-center justify-between group p-2 hover:bg-mistyBlue/10 transition-colors">
-                                    <div class="flex items-center gap-4">
-                                        <span class="text-lg font-bold ${i<3 ? 'text-dustyRed':'text-neutralGray'}">0${i+1}</span>
-                                        <div>
-                                            <p class="font-bold text-sm">${n.user}</p>
-                                            <p class="text-[10px] text-neutralGray line-clamp-1">${n.title}</p>
-                                        </div>
-                                    </div>
-                                    <span class="font-bold text-mistyBlue">${n.read}</span>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
+            handleUpload(input) {
+                if (input.files && input.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        this.state.currentImg = e.target.result;
+                        document.getElementById('previewImg').src = e.target.result;
+                        document.getElementById('imagePreview').classList.remove('hidden');
+                        document.getElementById('uploadContainer').classList.add('opacity-40');
+                        lucide.createIcons();
+                    };
+                    reader.readAsDataURL(input.files[0]);
+                }
             },
 
-            renderData(el) {
+            viewLargeImage() {
+                document.getElementById('largeImg').src = this.state.currentImg;
+                document.getElementById('largePreview').classList.remove('hidden');
+            },
+
+            renderTable(el) {
                 el.innerHTML = `
-                    <div class="flex gap-4 mb-6">
-                        <select class="retro-input text-xs font-bold text-neutralGray"><option>Flowith</option></select>
-                        <select class="retro-input text-xs font-bold text-neutralGray"><option>所有状态</option></select>
-                    </div>
-                    <div class="retro-card overflow-hidden">
-                        <table class="w-full text-left text-xs">
-                            <thead class="bg-[#F2EEE4] border-b border-[#B5AD96] font-bold">
+                    <div class="tech-card">
+                        <table class="w-full text-left">
+                            <thead class="bg-slateDeep text-white text-[10px] font-black uppercase tracking-[0.2em]">
                                 <tr>
-                                    <th class="px-6 py-4">作者</th><th class="px-6 py-4">标题</th><th class="px-6 py-4">阅读量</th><th class="px-6 py-4">状态</th><th class="px-6 py-4">操作</th>
+                                    <th class="px-10 py-6">笔记详情</th>
+                                    <th class="px-10 py-6">凭证</th>
+                                    <th class="px-10 py-6">阅读量</th>
+                                    <th class="px-10 py-6">复盘总结</th>
+                                    <th class="px-10 py-6">操作</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-[#B5AD96]/30">
-                                ${this.state.db.map(n => `
-                                    <tr class="hover:bg-mistyBlue/5">
-                                        <td class="px-6 py-4 font-bold text-neutralGray">${n.user}</td>
-                                        <td class="px-6 py-4 font-bold">${n.title}</td>
-                                        <td class="px-6 py-4 font-bold text-mistyBlue italic">${n.read.toLocaleString()}</td>
-                                        <td class="px-6 py-4">
-                                            <span class="px-2 py-1 rounded-sm text-[9px] font-bold ${n.status==='待更新'?'bg-dustyRed/10 text-dustyRed border border-dustyRed/20':'bg-mistyBlue/10 text-mistyBlue border border-mistyBlue/20'}">${n.status}</span>
+                            <tbody class="divide-y divide-gray-100">
+                                ${this.state.db.map(item => `
+                                    <tr class="hover:bg-cloud/30">
+                                        <td class="px-10 py-6">
+                                            <p class="font-black text-slateDeep">${item.title}</p>
+                                            <p class="text-[10px] text-gray-400 mt-1 uppercase">${item.type}</p>
                                         </td>
-                                        <td class="px-6 py-4"><i data-lucide="pencil" class="w-3 h-3 text-neutralGray cursor-pointer hover:text-black"></i></td>
+                                        <td class="px-10 py-6">
+                                            ${item.img ? `<img src="${item.img}" class="w-10 h-10 rounded-lg border border-gray-200 object-cover">` : '<span class="text-gray-300">-</span>'}
+                                        </td>
+                                        <td class="px-10 py-6 font-black text-acidPurple italic text-lg">${item.read}</td>
+                                        <td class="px-10 py-6 text-xs text-gray-500 max-w-xs truncate">${item.review || '未填写复盘'}</td>
+                                        <td class="px-10 py-6"><button class="text-gray-300 hover:text-slateDeep"><i data-lucide="more-horizontal"></i></button></td>
                                     </tr>
-                                `).join('')}
+                                `).join('') || '<tr><td colspan="5" class="py-20 text-center text-gray-400 italic font-bold">暂无数据记录，请录入您的第一篇笔记</td></tr>'}
                             </tbody>
                         </table>
                     </div>
                 `;
             },
 
-            renderMine(el) {
-                const myNotes = this.state.db.filter(i => i.user === this.state.user);
-                el.innerHTML = `
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
-                        <div class="col-span-1 space-y-6">
-                            <div class="retro-card p-10 text-center">
-                                <div class="w-20 h-20 bg-mistyBlue/20 border-2 border-mistyBlue rounded-full mx-auto mb-4 flex items-center justify-center">
-                                    <i data-lucide="user-2" class="w-8 h-8 text-mistyBlue"></i>
-                                </div>
-                                <h3 class="text-xl font-bold">${this.state.user}</h3>
-                                <p class="text-[10px] font-black text-neutralGray uppercase tracking-widest mt-2 italic">Official Spark Member</p>
-                            </div>
-                            <div class="retro-card p-6 border-l-4 border-l-dustyRed">
-                                <h4 class="text-xs font-bold uppercase mb-4 tracking-tighter">Pending Task / 待办</h4>
-                                <div class="bg-dustyRed/5 p-3 border border-dustyRed/10 text-[11px] font-bold text-dustyRed">有 1 篇笔记发布已超24h，请回填数据</div>
-                            </div>
-                        </div>
-                        <div class="col-span-2 space-y-6">
-                            <div class="retro-card p-8">
-                                <h4 class="text-sm font-black uppercase italic border-b border-[#B5AD96] pb-2 mb-6">Personal Analytics / 个人概览</h4>
-                                <div class="grid grid-cols-3 gap-6">
-                                    <div class="p-4 bg-beige/50 border border-[#B5AD96]">
-                                        <p class="text-[9px] font-bold text-neutralGray">笔记数</p>
-                                        <p class="text-2xl font-bold">${myNotes.length}</p>
-                                    </div>
-                                    <div class="p-4 bg-beige/50 border border-[#B5AD96]">
-                                        <p class="text-[9px] font-bold text-neutralGray">平均阅读</p>
-                                        <p class="text-2xl font-bold">2.4k</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            },
-
             openModal() { document.getElementById('modal').classList.remove('hidden'); },
             closeModal() { document.getElementById('modal').classList.add('hidden'); },
-            aiParse() { alert("模拟：AI 已抓取当前小红书链接标题..."); document.getElementById('title').value = "解析成果：2026 爆款实录"; }
+        };
+
+        document.getElementById('noteForm').onsubmit = (e) => {
+            e.preventDefault();
+            const newItem = {
+                title: document.getElementById('m_title').value,
+                type: document.getElementById('m_type').value,
+                read: document.getElementById('v_read').value,
+                review: document.getElementById('m_review').value,
+                img: app.state.currentImg,
+                time: new Date().toLocaleString()
+            };
+            app.state.db.unshift(newItem);
+            localStorage.setItem('spark_pro_db', JSON.stringify(app.state.db));
+            app.navigate('data');
+            app.closeModal();
+            // 重置
+            app.state.currentImg = null;
+            document.getElementById('imagePreview').classList.add('hidden');
         };
 
         window.onload = () => app.init();
-
-        document.getElementById('entryForm').onsubmit = (e) => {
-            e.preventDefault();
-            const newItem = {
-                id: Date.now(),
-                user: app.state.user,
-                title: document.getElementById('title').value,
-                read: parseInt(document.getElementById('r').value) || 0,
-                type: document.getElementById('type').value,
-                status: '已更新',
-                hot: (parseInt(document.getElementById('r').value) || 0) > 1000
-            };
-            app.state.db.unshift(newItem);
-            localStorage.setItem('spark_db_retro', JSON.stringify(app.state.db));
-            app.navigate(app.state.view);
-            app.closeModal();
-        };
     </script>
 </body>
 </html>
