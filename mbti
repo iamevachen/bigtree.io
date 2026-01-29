@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>人格实验室：你的灵魂是什么样的小物？</title>
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --bg: #f0f2f5;
+        }
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; background: var(--bg); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        #game-container { background: white; width: 90%; max-width: 500px; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; }
+        .hidden { display: none; }
+        .btn { background: var(--primary); color: white; border: none; padding: 12px 25px; border-radius: 25px; cursor: pointer; font-size: 16px; margin: 10px; transition: 0.3s; }
+        .btn:hover { transform: scale(1.05); opacity: 0.9; }
+        .mbti-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 20px; }
+        .option-btn { display: block; width: 100%; margin: 10px 0; padding: 15px; border: 2px solid #eee; border-radius: 10px; cursor: pointer; }
+        .option-btn:hover { border-color: var(--primary); background: #f8f7ff; }
+        #result-card { background: linear-gradient(135deg, #6c5ce7, #a29bfe); color: white; padding: 20px; border-radius: 15px; margin-top: 20px; }
+        .card-tag { display: inline-block; background: rgba(255,255,255,0.2); padding: 5px 10px; border-radius: 5px; font-size: 12px; margin: 5px; }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <div id="step-1">
+        <h2>🔬 第一步：同步你的波段</h2>
+        <p>请选择你的 MBTI 人格类型</p>
+        <div class="mbti-grid" id="mbti-selector"></div>
+    </div>
+
+    <div id="step-2" class="hidden">
+        <h3 id="question-text">问题加载中...</h3>
+        <div id="options-container"></div>
+        <p style="font-size: 12px; color: #999;">进度: <span id="progress">0</span>/5</p>
+    </div>
+
+    <div id="step-3" class="hidden">
+        <h2>✨ 你的灵魂物化结果</h2>
+        <div id="result-card">
+            <h1 id="res-type-name">...</h1>
+            <p id="res-description"></p>
+            <div id="res-tags"></div>
+            <hr>
+            <p><strong>适合周边：</strong><span id="res-product"></span></p>
+        </div>
+        <button class="btn" onclick="location.reload()">重新测试</button>
+        <p style="font-size: 12px; color: #666; margin-top: 15px;">© 人格实验室 | 结果可点击保存分享</p>
+    </div>
+</div>
+
+<script>
+    const mbtis = ['INTJ', 'INTP', 'ENTJ', 'ENTP', 'INFJ', 'INFP', 'ENFJ', 'ENFP', 'ISTJ', 'ISFJ', 'ESTJ', 'ESFJ', 'ISTP', 'ISFP', 'ESTP', 'ESFP'];
+    const questions = [
+        { q: "如果你是一个杯子，你希望装什么？", options: [{t:"烈酒", v:"T"}, {t:"清茶", v:"F"}] },
+        { q: "周末你会把自己放在哪里？", options: [{t:"热闹的集市", v:"E"}, {t:"安静的角落", v:"I"}] },
+        { q: "面对混乱，你的第一反应是？", options: [{t:"整理它", v:"J"}, {t:"加入它", v:"P"}] },
+        { q: "你更相信哪种力量？", options: [{t:"逻辑与数据", v:"T"}, {t:"直觉与情感", v:"F"}] },
+        { q: "当世界末日来临，你会？", options: [{t:"制定生存计划", v:"S"}, {t:"寻找浪漫的死法", v:"N"}] }
+    ];
+
+    const products = {
+        'INTJ': { name: "黑洞咖啡豆", desc: "看似冰冷深邃，实则浓郁提神，仅供少数人品鉴。", tags: ["极理性", "高压", "独立"] },
+        'INFP': { name: "月光捕梦网", desc: "捕捉那些不切实际的幻想，并在深夜将其编织成诗。", tags: ["共情者", "唯美", "易碎"] },
+        'ENTP': { name: "全自动抬杠机", desc: "如果你没意见，它会制造意见；你有意见，它就是你的意见。", tags: ["打破常规", "脑洞", "混乱中立"] },
+        'ENFP': { name: "彩虹喷漆", desc: "哪里沉闷喷哪里，让整个宇宙都充满快乐的废话。", tags: ["快乐修勾", "治愈", "自由"] },
+        // ... 此处可以扩展更多人格对应的具体物品
+    };
+
+    let userMBTI = "";
+    let currentQ = 0;
+    let scores = { E:0, I:0, T:0, F:0, P:0, J:0, S:0, N:0 };
+
+    // 初始化 MBTI 选择器
+    const selector = document.getElementById('mbti-selector');
+    mbtis.forEach(type => {
+        const btn = document.createElement('button');
+        btn.className = 'btn';
+        btn.style.padding = '10px 5px';
+        btn.innerText = type;
+        btn.onclick = () => startTest(type);
+        selector.appendChild(btn);
+    });
+
+    function startTest(type) {
+        userMBTI = type;
+        document.getElementById('step-1').classList.add('hidden');
+        document.getElementById('step-2').classList.remove('hidden');
+        showQuestion();
+    }
+
+    function showQuestion() {
+        if(currentQ < questions.length) {
+            const q = questions[currentQ];
+            document.getElementById('question-text').innerText = q.q;
+            const optContainer = document.getElementById('options-container');
+            optContainer.innerHTML = "";
+            q.options.forEach(opt => {
+                const b = document.createElement('button');
+                b.className = 'option-btn';
+                b.innerText = opt.t;
+                b.onclick = () => { scores[opt.v]++; currentQ++; showQuestion(); };
+                optContainer.appendChild(b);
+            });
+            document.getElementById('progress').innerText = currentQ;
+        } else {
+            showResult();
+        }
+    }
+
+    function showResult() {
+        document.getElementById('step-2').classList.add('hidden');
+        document.getElementById('step-3').classList.remove('hidden');
+        
+        // 逻辑：如果题库测出的倾向与初始选择一致，则强化该属性，如果不一致，则生成“混血”结果
+        const data = products[userMBTI] || { name: "神秘盲盒", desc: "复杂的人格难以定义，你是独特的限量版。", tags: ["独特", "多元", "未知"] };
+        
+        document.getElementById('res-type-name').innerText = data.name;
+        document.getElementById('res-description').innerText = data.desc;
+        document.getElementById('res-product').innerText = userMBTI + " 定制款挂件";
+        
+        const tagsDiv = document.getElementById('res-tags');
+        data.tags.forEach(tag => {
+            const span = document.createElement('span');
+            span.className = 'card-tag';
+            span.innerText = "# " + tag;
+            tagsDiv.appendChild(span);
+        });
+    }
+</script>
+</body>
+</html>
